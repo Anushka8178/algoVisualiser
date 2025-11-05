@@ -1,0 +1,134 @@
+import { motion } from 'framer-motion';
+
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex flex-col items-center justify-center text-white text-center p-6 relative overflow-hidden">
+      {/* Animated background shapes - soft floating blobs */}
+      <motion.div
+        className="absolute top-20 left-10 w-40 h-40 bg-pink-300 rounded-full opacity-30 blur-3xl"
+        animate={{ 
+          y: [0, 30, 0], 
+          x: [0, 20, 0],
+          scale: [1, 1.1, 1] 
+        }}
+        transition={{ 
+          duration: 8, 
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div
+        className="absolute bottom-20 right-10 w-60 h-60 bg-yellow-300 rounded-full opacity-30 blur-3xl"
+        animate={{ 
+          y: [0, -40, 0], 
+          x: [0, -15, 0],
+          scale: [1, 1.15, 1] 
+        }}
+        transition={{ 
+          duration: 10, 
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div
+        className="absolute top-1/2 left-1/4 w-32 h-32 bg-purple-300 rounded-full opacity-25 blur-3xl"
+        animate={{ 
+          y: [0, -25, 0], 
+          x: [0, 30, 0],
+          scale: [1, 1.2, 1] 
+        }}
+        transition={{ 
+          duration: 12, 
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+
+      {/* Title - animated from top */}
+      <motion.h1
+        className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 drop-shadow-2xl [text-shadow:0_0_30px_rgba(255,255,255,0.5),0_0_60px_rgba(255,255,255,0.3)]"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
+        Algorithm Visualizer
+      </motion.h1>
+
+      {/* Tagline - animated from bottom */}
+      <motion.p
+        className="text-lg sm:text-xl md:text-2xl max-w-2xl mb-12 text-white/95 font-medium"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+      >
+        Learn algorithms the interactive way — visualize, play, and master step-by-step!
+      </motion.p>
+
+      {/* Buttons - scale-up animation with pulsing Get Started */}
+      <motion.div
+        className="flex flex-col sm:flex-row gap-4 items-center justify-center"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
+      >
+        {/* Get Started Button - with pulsing animation */}
+        <motion.button
+          className="bg-white text-purple-600 hover:bg-purple-50 font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all duration-300 relative"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          animate={{
+            boxShadow: [
+              "0 10px 30px rgba(255, 255, 255, 0.3)",
+              "0 10px 40px rgba(255, 255, 255, 0.5)",
+              "0 10px 30px rgba(255, 255, 255, 0.3)"
+            ]
+          }}
+          transition={{
+            boxShadow: {
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }
+          }}
+        >
+          Get Started
+        </motion.button>
+
+        {/* Login Button */}
+        <motion.button
+          className="bg-transparent border-2 border-white hover:bg-white/20 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
+          whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Login
+        </motion.button>
+
+        {/* About Button */}
+        <motion.button
+          className="bg-transparent border-2 border-white hover:bg-white/20 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
+          whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
+          whileTap={{ scale: 0.95 }}
+        >
+          About
+        </motion.button>
+      </motion.div>
+
+      {/* Footer - subtle animation */}
+      <motion.footer
+        className="absolute bottom-10 text-sm text-white/70"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0.5, 0.8, 0.5] }}
+        transition={{ 
+          opacity: {
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut"
+          },
+          delay: 1.2
+        }}
+      >
+        © 2025 Algorithm Visualizer Team
+      </motion.footer>
+    </div>
+  );
+}
