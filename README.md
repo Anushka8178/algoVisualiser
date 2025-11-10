@@ -318,15 +318,6 @@ tech:
 - [ ] Dark mode
 - [ ] Mobile app (React Native)
 
----
-
----
-
-## 📚 Additional Documentation
-
-- **[SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md)** - Detailed step-by-step setup guide
-
----
 
 Thank you
 
