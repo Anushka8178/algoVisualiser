@@ -1,7 +1,7 @@
-# 🧮 Algorithm Visualizer
+#  Algorithm Visualizer
 
 
-## 🧭 Table of Contents
+##  Table of Contents
 
 - [About the Project](#-about-the-project)
 - [Features](#-features)
@@ -9,8 +9,6 @@
 - [Setup Guide (Local Build)](#-setup-guide-local-build)
 - [Project Metadata](#-project-metadata)
 - [Team](#-team)
-- [Upcoming Plans](#-upcoming-plans)
-- [License](#-license)
 
 ---
 
@@ -66,7 +64,7 @@ The app also introduces gamification, letting users build learning streaks, comp
 
 ---
 
-## 🧰 Setup Guide (Local Build)
+##  Setup Guide (Local Build)
 
 This guide helps you run the project locally.
 
@@ -78,7 +76,7 @@ This guide helps you run the project locally.
 - **PostgreSQL** ≥ 15 → [Download here](https://www.postgresql.org/download/)
 - **Git** → [Download here](https://git-scm.com/downloads)
 
-### 🪜 Step 1: Clone the Repository
+###  Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/Anushka8178/algoVisualiser.git
@@ -100,7 +98,7 @@ cd backend
 npm install
 ```
 
-### 🗄️ Step 3: Set Up Database
+###  Step 3: Set Up Database
 
 1. Open PostgreSQL (psql) or pgAdmin
 2. Run these commands:
@@ -115,7 +113,7 @@ CREATE DATABASE algovisualizer;
    - Host (`localhost`)
    - Port (`5432`)
 
-### ⚙️ Step 4: Configure the Backend
+###  Step 4: Configure the Backend
 
 1. Go to the backend folder:
 
@@ -142,32 +140,32 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 > ** You can also copy `backend/ENV_EXAMPLE.txt` and rename it to `.env`, then fill in your values.
 
-### 🚀 Step 5: Run the App
+###  Step 5: Run the App
 
 You'll need **two terminals**:
 
-#### 🖥️ Terminal 1 — Backend
+####  Terminal 1 — Backend
 
 ```bash
 cd backend
 npm run dev
 ```
 
-✅ **Wait for:**
+ **Wait for:**
 
 ```
 Database connected ✅
 Server running on port 5000
 ```
 
-#### 🌐 Terminal 2 — Frontend
+####  Terminal 2 — Frontend
 
 ```bash
 cd algoVisualiser  # (project root)
 npm run dev
 ```
 
-✅ **Wait for:**
+ **Wait for:**
 
 ```
 VITE v5.x.x  ready in xxx ms
@@ -187,26 +185,17 @@ VITE v5.x.x  ready in xxx ms
 
 ---
 
-## 🧩 Common Issues
+##  Common Issues
 
 | Error | Solution |
 |-------|----------|
 | Cannot connect to DB | Ensure PostgreSQL is running and `.env` is correct |
-| Port 5000 in use | Change `PORT=5001` in `.env` |
 | JWT Secret not defined | Add `JWT_SECRET` to `.env` and restart backend |
 | Blank frontend page | Refresh or check console errors |
 | Module not found | Run `npm install` again |
 
 ---
 
-##  Quick Reference
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start local dev server (frontend/backend) |
-| `npm start` | Start backend in production mode |
-| `npm run build` | Build frontend for production |
-| `psql -U postgres` | Access PostgreSQL terminal |
 
 ---
 
@@ -305,7 +294,7 @@ tech:
 
 ---
 
-## 👥 Team
+##  Team
 
 | Member | ID | Role |
 |--------|-----|------|
@@ -319,7 +308,7 @@ tech:
 
 ---
 
-## 🚀 Upcoming Plans
+##  Upcoming Plans
 
 - [ ] Other DSA Algorithms (A*, Maze generation)
 - [ ] Online deployment (Netlify + Render)
@@ -336,16 +325,10 @@ tech:
 ## 📚 Additional Documentation
 
 - **[SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md)** - Detailed step-by-step setup guide
-- **[QUICK_START.md](QUICK_START.md)** - Quick reference guide
-- **[PROJECT_METADATA.md](PROJECT_METADATA.md)** - Technical documentation
-- **[START_HERE.md](START_HERE.md)** - Getting started guide
 
 ---
 
-
+Thank you
 
 ---
 
-**Happy Learning! 🚀**
-
-*Made with ❤️ by Team Algorithm Visualizer*
