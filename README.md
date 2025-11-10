@@ -6,7 +6,7 @@
 - [About the Project](#-about-the-project)
 - [Features](#-features)
 - [Technologies Used](#️-technologies-used)
-- [Set up locally](#-setup-guide-)
+- [Set up locally](#setup-guide-local-build)
 - [Project Metadata](#-project-metadata)
 - [Team](#-team)
 
