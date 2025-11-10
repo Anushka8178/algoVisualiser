@@ -1,62 +1,132 @@
 import { motion } from 'framer-motion';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
+import AlgorithmNavigator from '../components/AlgorithmNavigator';
+import BubbleSortViz from '../visualizations/BubbleSortViz';
+import QuickSortViz from '../visualizations/QuickSortViz';
+import MergeSortViz from '../visualizations/MergeSortViz';
+import InsertionSortViz from '../visualizations/InsertionSortViz';
+import BinarySearchViz from '../visualizations/BinarySearchViz';
+import BFSSearchViz from '../visualizations/BFSSearchViz';
+import DFSSearchViz from '../visualizations/DFSSearchViz';
+import DijkstraViz from '../visualizations/DijkstraViz';
 
-export default function Visualize(){
+export default function Visualize() {
   const { id } = useParams();
   const { hasCompleted } = useAuth();
-  if(!hasCompleted(id)) return <Navigate to={`/material/${id}`} replace />;
+  if (!hasCompleted(id)) return <Navigate to={`/material/${id}`} replace />;
+
+  // Render the appropriate visualization component
+  const renderViz = () => {
+    switch(id) {
+      case 'bubble-sort': return <BubbleSortViz showNavbar={false} showNavigator={false} />;
+      case 'quick-sort': return <QuickSortViz showNavbar={false} showNavigator={false} />;
+      case 'merge-sort': return <MergeSortViz showNavbar={false} showNavigator={false} />;
+      case 'insertion-sort': return <InsertionSortViz showNavbar={false} showNavigator={false} />;
+      case 'binary-search': return <BinarySearchViz showNavbar={false} showNavigator={false} />;
+      case 'bfs': return <BFSSearchViz showNavbar={false} showNavigator={false} />;
+      case 'dfs': return <DFSSearchViz showNavbar={false} showNavigator={false} />;
+      case 'dijkstra': return <DijkstraViz showNavbar={false} showNavigator={false} />;
+      default: return <div className="text-center py-20 text-cyan-400">Visualization not available for this algorithm</div>;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <Navbar />
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <header className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold drop-shadow">{formatTitle(id)}</h1>
-            <p className="text-white/90">Visualize step-by-step execution</p>
-          </div>
-          <Link to="/dashboard" className="text-white/90 hover:text-white underline">← Back to Dashboard</Link>
+        <AlgorithmNavigator currentSlug={id} />
+        <header className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{formatTitle(id)}</h1>
+          <p className="text-lg font-medium text-cyan-100/80">Visualize step-by-step execution</p>
         </header>
 
-        {/* Canvas placeholder */}
-        <motion.div className="bg-white/10 backdrop-blur rounded-2xl border border-white/20 shadow-xl h-72 md:h-96 flex items-center justify-center"
-          initial={{ opacity:0 }} animate={{ opacity:1 }}>
-          <div className="text-white/80">Visualization Canvas (plug D3.js or custom animations here)</div>
+        {/* ✅ Visualization section */}
+        <motion.div
+          className=""
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          {renderViz()}
         </motion.div>
 
-        {/* Controls */}
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <motion.button className="bg-white text-purple-600 rounded-xl py-3 font-semibold hover:bg-purple-50" whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}>Play</motion.button>
-          <motion.button className="bg-white/20 border border-white/30 rounded-xl py-3 font-semibold hover:bg-white/30" whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}>Pause</motion.button>
-          <motion.button className="bg-white/20 border border-white/30 rounded-xl py-3 font-semibold hover:bg-white/30" whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}>Step</motion.button>
-          <motion.button className="bg-white/20 border border-white/30 rounded-xl py-3 font-semibold hover:bg-white/30" whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}>Reset</motion.button>
-        </div>
-
-        {/* Info */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/20">
-            <div className="text-sm text-white/80">Time Complexity</div>
-            <div className="text-lg font-semibold">O(n log n)</div>
+        {/* Info Section - Only show if visualization doesn't already include it */}
+        {!['bubble-sort', 'insertion-sort', 'merge-sort', 'quick-sort', 'binary-search', 'bfs', 'dfs', 'dijkstra'].includes(id) && (
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
+              <div className="text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Time Complexity</div>
+              <div className="text-2xl font-bold font-mono text-cyan-400">
+                {getTimeComplexity(id)}
+              </div>
+            </div>
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
+              <div className="text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Space Complexity</div>
+              <div className="text-2xl font-bold font-mono text-cyan-400">
+                {getSpaceComplexity(id)}
+              </div>
+            </div>
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
+              <div className="text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Algorithm</div>
+              <div className="text-xl font-bold text-white">{formatTitle(id)}</div>
+            </div>
           </div>
-          <div className="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/20">
-            <div className="text-sm text-white/80">Space Complexity</div>
-            <div className="text-lg font-semibold">O(n)</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/20">
-            <div className="text-sm text-white/80">Algorithm</div>
-            <div className="text-lg font-semibold">{formatTitle(id)}</div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
-function formatTitle(id){
-  if(!id) return '';
-  return id.split('-').map(s=> s[0].toUpperCase()+s.slice(1)).join(' ');
+function formatTitle(id) {
+  if (!id) return '';
+  
+  // Handle special cases
+  const specialCases = {
+    'bfs': 'Breadth-First Search',
+    'dfs': 'Depth-First Search',
+    'dijkstra': "Dijkstra's Algorithm",
+    'bubble-sort': 'Bubble Sort',
+    'quick-sort': 'Quick Sort',
+    'merge-sort': 'Merge Sort',
+    'insertion-sort': 'Insertion Sort',
+    'binary-search': 'Binary Search'
+  };
+  
+  if (specialCases[id]) {
+    return specialCases[id];
+  }
+  
+  // Handle kebab-case (e.g., "bubble-sort" -> "Bubble Sort")
+  return id
+    .split('-')
+    .map((s) => s[0].toUpperCase() + s.slice(1))
+    .join(' ');
 }
 
+function getTimeComplexity(id) {
+  const complexities = {
+    'bubble-sort': 'O(n²)',
+    'quick-sort': 'O(n log n)',
+    'merge-sort': 'O(n log n)',
+    'insertion-sort': 'O(n²)',
+    'binary-search': 'O(log n)',
+    'bfs': 'O(V + E)',
+    'dfs': 'O(V + E)',
+    'dijkstra': 'O((V+E) log V)'
+  };
+  return complexities[id] || 'Varies';
+}
 
+function getSpaceComplexity(id) {
+  const complexities = {
+    'bubble-sort': 'O(1)',
+    'quick-sort': 'O(n)',
+    'merge-sort': 'O(n)',
+    'insertion-sort': 'O(1)',
+    'binary-search': 'O(1)',
+    'bfs': 'O(V)',
+    'dfs': 'O(V)',
+    'dijkstra': 'O(V)'
+  };
+  return complexities[id] || 'Varies';
+}

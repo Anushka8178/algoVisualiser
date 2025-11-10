@@ -13,6 +13,15 @@ import Register from './pages/Register'
 import Material from './pages/Material'
 import NotFound from './components/NotFound'
 import { ToastProvider } from './components/ToastProvider'
+import BubbleSortViz from "./visualizations/BubbleSortViz";
+import QuickSortViz from "./visualizations/QuickSortViz";
+import MergeSortViz from "./visualizations/MergeSortViz";
+import InsertionSortViz from "./visualizations/InsertionSortViz";
+import BinarySearchViz from "./visualizations/BinarySearchViz";
+import BFSSearchViz from "./visualizations/BFSSearchViz";
+import DFSSearchViz from "./visualizations/DFSSearchViz";
+import DijkstraViz from "./visualizations/DijkstraViz";
+
 
 function App() {
   return (
@@ -27,11 +36,19 @@ function App() {
 
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/material/:id" element={<ProtectedRoute><Material /></ProtectedRoute>} />
-            <Route path="/visualize/:id" element={<ProtectedRoute><Visualize /></ProtectedRoute>} />
             <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
             <Route path="/notes/:id" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/visualize/bubble-sort" element={<BubbleSortViz />} />
+            <Route path="/visualize/quick-sort" element={<QuickSortViz />} />
+            <Route path="/visualize/merge-sort" element={<MergeSortViz />} />
+            <Route path="/visualize/insertion-sort" element={<InsertionSortViz />} />
+            <Route path="/visualize/binary-search" element={<BinarySearchViz />} />
+            <Route path="/visualize/bfs" element={<BFSSearchViz />} />
+            <Route path="/visualize/dfs" element={<DFSSearchViz />} />
+            <Route path="/visualize/dijkstra" element={<DijkstraViz />} />
+            <Route path="/visualize/:id" element={<ProtectedRoute><Visualize /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

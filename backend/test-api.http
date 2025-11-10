@@ -1,0 +1,38 @@
+### REGISTER USER
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "meg",
+  "email": "meg@example.com",
+  "password": "12345"
+}
+
+###
+
+### LOGIN USER
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "meg@example.com",
+  "password": "12345"
+}
+
+###
+
+### GET NOTES (requires token from login response)
+GET http://localhost:5000/api/notes
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+###
+
+### ADD NEW NOTE
+POST http://localhost:5000/api/notes
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+{
+  "algorithm_name": "Bubble Sort",
+  "content": "It repeatedly swaps adjacent elements until sorted."
+}

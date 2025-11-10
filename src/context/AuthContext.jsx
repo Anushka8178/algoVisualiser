@@ -9,10 +9,8 @@ export function AuthProvider({ children }) {
     return raw ? JSON.parse(raw) : null;
   });
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(() => {
-    const raw = localStorage.getItem('av_progress');
-    return raw ? JSON.parse(raw) : { completedIds: [], lastCompleteDate: null, streak: 0 };
-  });
+  const [userStats, setUserStats] = useState(null);
+  const [completedAlgorithms, setCompletedAlgorithms] = useState([]);
 
   useEffect(() => {
     if (token) localStorage.setItem('av_token', token);
@@ -24,21 +22,41 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem('av_user');
   }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem('av_progress', JSON.stringify(progress));
-  }, [progress]);
 
   const login = async ({ email, password }) => {
     setLoading(true);
     try {
-      // TODO: Replace with real API call
-      await new Promise(r => setTimeout(r, 600));
-      const fakeToken = 'fake-jwt-token';
-      setToken(fakeToken);
-      setUser({ email, name: email.split('@')[0], rank: 42 });
-      return { success: true };
+      console.log('Logging in user:', email);
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      console.log('Login response:', { status: response.status, hasToken: !!data.token, error: data.error });
+
+      if (response.ok && data.token) {
+        setToken(data.token);
+        setUser({ 
+          id: data.user.id,
+          email: data.user.email, 
+          username: data.user.username,
+          name: data.user.username 
+        });
+        
+        // Fetch user stats and progress
+        await fetchUserStats(data.token);
+        
+        return { success: true };
+      } else {
+        return { success: false, message: data.error || 'Login failed' };
+      }
     } catch (e) {
-      return { success: false, message: 'Login failed' };
+      console.error('Login error:', e);
+      return { success: false, message: 'Login failed. Please try again.' };
     } finally {
       setLoading(false);
     }
@@ -47,11 +65,26 @@ export function AuthProvider({ children }) {
   const register = async ({ name, email, password }) => {
     setLoading(true);
     try {
-      // TODO: Replace with real API call
-      await new Promise(r => setTimeout(r, 700));
-      return { success: true };
+      console.log('Registering user:', { name, email });
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: name, email, password }),
+      });
+
+      const data = await response.json();
+      console.log('Registration response:', { status: response.status, data });
+
+      if (response.ok) {
+        return { success: true, message: data.message || 'Registration successful' };
+      } else {
+        return { success: false, message: data.error || 'Registration failed' };
+      }
     } catch (e) {
-      return { success: false, message: 'Registration failed' };
+      console.error('Registration error:', e);
+      return { success: false, message: 'Registration failed. Please try again.' };
     } finally {
       setLoading(false);
     }
@@ -60,22 +93,113 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setToken(null);
     setUser(null);
+    setUserStats(null);
+    setCompletedAlgorithms([]);
   };
 
-  const hasCompleted = (id) => progress.completedIds.includes(id);
-
-  const completeAlgorithm = (id) => {
-    if (hasCompleted(id)) return;
-    const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
-    const alreadyCountedToday = progress.lastCompleteDate === today;
-    setProgress(p => ({
-      completedIds: [...p.completedIds, id],
-      lastCompleteDate: today,
-      streak: alreadyCountedToday ? p.streak : p.streak + 1
-    }));
+  const fetchUserStats = async (authToken) => {
+    if (!authToken) return;
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/progress/stats', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Fetched user stats:', data.stats);
+        setUserStats(data.stats);
+        
+        // Fetch completed algorithms
+        const historyResponse = await fetch('http://localhost:5000/api/progress/history', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+          },
+        });
+        
+        if (historyResponse.ok) {
+          const history = await historyResponse.json();
+          const completed = history
+            .filter(p => p.activityType === 'completed')
+            .map(p => p.Algorithm?.slug || p.algorithmId)
+            .filter(Boolean);
+          setCompletedAlgorithms([...new Set(completed)]);
+        }
+      } else {
+        const errorText = await response.text();
+        console.error('Failed to fetch stats:', response.status, errorText);
+      }
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+    }
   };
 
-  const value = useMemo(() => ({ token, user, loading, login, logout, register, isAuthenticated: Boolean(token), progress, hasCompleted, completeAlgorithm }), [token, user, loading, progress]);
+  const hasCompleted = (slug) => completedAlgorithms.includes(slug);
+
+  const completeAlgorithm = async (slug) => {
+    if (!token) {
+      console.warn('Cannot complete algorithm: not logged in');
+      return;
+    }
+
+    if (hasCompleted(slug)) return;
+
+    try {
+      // First, get the algorithm ID from slug
+      const algoResponse = await fetch(`http://localhost:5000/api/algorithms/${slug}`);
+      if (!algoResponse.ok) {
+        console.error('Algorithm not found');
+        return;
+      }
+      const algorithm = await algoResponse.json();
+
+      // Track completion in backend
+      const response = await fetch('http://localhost:5000/api/progress/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          algorithmId: algorithm.id,
+          activityType: 'completed',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCompletedAlgorithms(prev => [...prev, slug]);
+        
+        // Refresh stats to get updated streak and engagement
+        await fetchUserStats(token);
+      }
+    } catch (error) {
+      console.error('Error completing algorithm:', error);
+    }
+  };
+
+  // Fetch stats when token changes or when user is available
+  useEffect(() => {
+    if (token) {
+      fetchUserStats(token);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, user?.id]);
+
+  const value = useMemo(() => ({ 
+    token, 
+    user, 
+    loading, 
+    login, 
+    logout, 
+    register, 
+    isAuthenticated: Boolean(token), 
+    userStats,
+    hasCompleted, 
+    completeAlgorithm 
+  }), [token, user, loading, userStats, completedAlgorithms]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

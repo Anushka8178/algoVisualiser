@@ -33,34 +33,34 @@ export default function Register(){
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
-      <Link to="/" className="absolute top-6 left-6 text-white/80 hover:text-white">← Back to Home</Link>
-      <motion.div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 md:p-12 w-full max-w-md border border-white/20 shadow-2xl"
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
+      <Link to="/" className="absolute top-6 left-6 text-cyan-300/80 hover:text-cyan-200 transition-colors">← Back to Home</Link>
+      <motion.div className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-8 md:p-12 w-full max-w-md border border-cyan-500/20 shadow-xl shadow-cyan-900/20"
         initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}>
-        <h1 className="text-4xl font-extrabold mb-2 text-center">Create Account</h1>
-        <p className="text-white/80 text-center mb-8">Join and start visualizing algorithms</p>
+        <h1 className="text-4xl font-extrabold mb-2 text-center bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Create Account</h1>
+        <p className="text-cyan-100/80 text-center mb-8">Join and start visualizing algorithms</p>
         <form onSubmit={onSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-2">Name</label>
-            <input value={form.name} onChange={e=>setForm(f=>({ ...f, name:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50" placeholder="Your name" />
+            <label className="block text-sm font-medium mb-2 text-cyan-300/70">Name</label>
+            <input value={form.name} onChange={e=>setForm(f=>({ ...f, name:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" placeholder="Your name" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
-            <input type="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50" placeholder="you@email.com" />
+            <label className="block text-sm font-medium mb-2 text-cyan-300/70">Email</label>
+            <input type="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" placeholder="you@email.com" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
-            <input type="password" value={form.password} onChange={e=>setForm(f=>({ ...f, password:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50" placeholder="••••••••" />
+            <label className="block text-sm font-medium mb-2 text-cyan-300/70">Password</label>
+            <input type="password" value={form.password} onChange={e=>setForm(f=>({ ...f, password:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" placeholder="••••••••" />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Confirm Password</label>
-            <input type="password" value={form.confirm} onChange={e=>setForm(f=>({ ...f, confirm:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50" placeholder="••••••••" />
+            <label className="block text-sm font-medium mb-2 text-cyan-300/70">Confirm Password</label>
+            <input type="password" value={form.confirm} onChange={e=>setForm(f=>({ ...f, confirm:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" placeholder="••••••••" />
           </div>
-          <motion.button disabled={submitting} type="submit" className="w-full bg-white text-purple-600 hover:bg-purple-50 font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all duration-300" whileHover={{ scale: submitting?1:1.02 }} whileTap={{ scale: submitting?1:0.98 }}>
+          <motion.button disabled={submitting} type="submit" className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 disabled:opacity-50" whileHover={{ scale: submitting?1:1.02 }} whileTap={{ scale: submitting?1:0.98 }}>
             {submitting? 'Creating...' : 'Create Account'}
           </motion.button>
         </form>
-        <div className="mt-6 text-center text-sm text-white/80">Already have an account? <Link to="/login" className="text-white underline">Login</Link></div>
+        <div className="mt-6 text-center text-sm text-cyan-100/80">Already have an account? <Link to="/login" className="text-cyan-300 hover:text-cyan-200 underline">Login</Link></div>
       </motion.div>
     </div>
   );

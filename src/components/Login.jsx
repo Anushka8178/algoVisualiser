@@ -28,10 +28,10 @@ export default function Login() {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex flex-col items-center justify-center text-white p-6 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       {/* Animated background shapes */}
       <motion.div
-        className="absolute top-20 left-10 w-40 h-40 bg-pink-300 rounded-full opacity-30 blur-3xl"
+        className="absolute top-20 left-10 w-40 h-40 bg-cyan-500 rounded-full opacity-20 blur-3xl"
         animate={{ 
           y: [0, 30, 0], 
           x: [0, 20, 0],
@@ -44,7 +44,7 @@ export default function Login() {
         }}
       />
       <motion.div
-        className="absolute bottom-20 right-10 w-60 h-60 bg-yellow-300 rounded-full opacity-30 blur-3xl"
+        className="absolute bottom-20 right-10 w-60 h-60 bg-teal-500 rounded-full opacity-20 blur-3xl"
         animate={{ 
           y: [0, -40, 0], 
           x: [0, -15, 0],
@@ -60,20 +60,20 @@ export default function Login() {
       {/* Back to Home Button */}
       <Link 
         to="/" 
-        className="absolute top-6 left-6 text-white/80 hover:text-white transition-colors flex items-center gap-2"
+        className="absolute top-6 left-6 text-cyan-300/80 hover:text-cyan-200 transition-colors flex items-center gap-2 z-10"
       >
         <span>←</span> Back to Home
       </Link>
 
       {/* Login Form */}
       <motion.div
-        className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 md:p-12 w-full max-w-md border border-white/20 shadow-2xl"
+        className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-8 md:p-12 w-full max-w-md border border-cyan-500/20 shadow-xl shadow-cyan-900/20"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         <motion.h1
-          className="text-4xl font-extrabold mb-2 text-center"
+          className="text-4xl font-extrabold mb-2 text-center bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -81,7 +81,7 @@ export default function Login() {
           Welcome Back
         </motion.h1>
         <motion.p
-          className="text-white/80 text-center mb-8"
+          className="text-center mb-8 text-cyan-100/80"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
@@ -95,13 +95,13 @@ export default function Login() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-medium mb-2 text-cyan-300/70">Email</label>
             <input
               type="email"
               value={form.email}
               onChange={e=>setForm(f=>({ ...f, email:e.target.value }))}
               placeholder="your@email.com"
-              className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
             />
           </motion.div>
 
@@ -110,22 +110,22 @@ export default function Login() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <label className="block text-sm font-medium mb-2">Password</label>
+            <label className="block text-sm font-medium mb-2 text-cyan-300/70">Password</label>
             <input
               type="password"
               value={form.password}
               onChange={e=>setForm(f=>({ ...f, password:e.target.value }))}
               placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
             />
           </motion.div>
 
           <motion.button
             type="submit"
             disabled={submitting}
-            className="w-full bg-white text-purple-600 hover:bg-purple-50 font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-70"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 disabled:opacity-50"
+            whileHover={{ scale: submitting ? 1 : 1.02 }}
+            whileTap={{ scale: submitting ? 1 : 0.98 }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7 }}
@@ -135,13 +135,13 @@ export default function Login() {
         </form>
 
         <motion.div
-          className="mt-6 text-center text-sm text-white/70"
+          className="mt-6 text-center text-sm text-cyan-100/80"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
           Don't have an account?{' '}
-          <Link to="/register" className="text-white hover:underline font-medium">
+          <Link to="/register" className="text-cyan-300 hover:text-cyan-200 underline font-medium">
             Sign up
           </Link>
         </motion.div>

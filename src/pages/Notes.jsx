@@ -1,53 +1,299 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/ToastProvider';
+
+const API_URL = 'http://localhost:5000/api';
 
 export default function Notes(){
+  const { token } = useAuth();
+  const { showToast } = useToast();
   const params = useParams();
   const [sp] = useSearchParams();
   const paramId = params.id || sp.get('algo') || 'general';
-  const storageKey = useMemo(()=> `av_notes_${paramId}`, [paramId]);
   const [text, setText] = useState('');
-  const [notes, setNotes] = useState(()=>{
-    const raw = localStorage.getItem(storageKey);
-    return raw? JSON.parse(raw) : [];
-  });
-  useEffect(()=>{
-    localStorage.setItem(storageKey, JSON.stringify(notes));
-  }, [notes, storageKey]);
-  const save = () => {
-    if(!text.trim()) return;
-    setNotes(n => [{ id: crypto.randomUUID(), text, createdAt: new Date().toISOString() }, ...n]);
-    setText('');
+  const [notes, setNotes] = useState([]);
+  const [algorithm, setAlgorithm] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editingNote, setEditingNote] = useState(null);
+  const [editText, setEditText] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch algorithm by slug
+        const algoResponse = await fetch(`${API_URL}/algorithms/${paramId}`);
+        if (algoResponse.ok) {
+          const algoData = await algoResponse.json();
+          setAlgorithm(algoData);
+          
+          // Fetch notes for this algorithm
+          const notesResponse = await fetch(`${API_URL}/notes/algorithm/${paramId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          
+          if (notesResponse.ok) {
+            const notesData = await notesResponse.json();
+            setNotes(notesData);
+          }
+        } else if (algoResponse.status === 404) {
+          // Algorithm not found, but still try to fetch notes
+          const notesResponse = await fetch(`${API_URL}/notes`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          if (notesResponse.ok) {
+            const notesData = await notesResponse.json();
+            setNotes(notesData);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        showToast('Error loading notes', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [paramId, token, showToast]);
+
+  const save = async () => {
+    if(!text.trim() || !algorithm || !token) return;
+    
+    setSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          algorithmId: algorithm.id,
+          content: text.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        const newNote = await response.json();
+        setNotes([newNote, ...notes]);
+        setText('');
+        showToast('Note saved successfully', 'success');
+      } else {
+        const error = await response.json();
+        showToast(error.error || 'Failed to save note', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving note:', error);
+      showToast('Error saving note', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
-  const remove = (id) => setNotes(n => n.filter(x=> x.id !== id));
+
+  const startEdit = (note) => {
+    setEditingNote(note.id);
+    setEditText(note.content);
+  };
+
+  const cancelEdit = () => {
+    setEditingNote(null);
+    setEditText('');
+  };
+
+  const updateNote = async (id) => {
+    if (!editText.trim() || !token) return;
+    
+    setSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/notes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          content: editText.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        const updatedNote = await response.json();
+        setNotes(notes.map(n => n.id === id ? updatedNote : n));
+        setEditingNote(null);
+        setEditText('');
+        showToast('Note updated successfully', 'success');
+      } else {
+        const error = await response.json();
+        showToast(error.error || 'Failed to update note', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating note:', error);
+      showToast('Error updating note', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (id) => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/notes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setNotes(notes.filter(n => n.id !== id));
+        showToast('Note deleted', 'success');
+      } else {
+        showToast('Failed to delete note', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      showToast('Error deleting note', 'error');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          <div className="text-center py-20 text-cyan-400">Loading notes...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <h1 className="text-3xl font-extrabold mb-1 drop-shadow">Notes</h1>
-        <div className="text-white/80 mb-4 text-sm">Algorithm: {paramId}</div>
-        <div className="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20 shadow-xl">
-          <textarea value={text} onChange={e=>setText(e.target.value)} rows={5} placeholder="Write your note about the algorithm..." className="w-full rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/60 p-4 focus:outline-none focus:ring-2 focus:ring-white/50" />
-          <div className="mt-4 flex gap-3">
-            <motion.button onClick={save} className="bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-purple-50" whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}>Save</motion.button>
-            <motion.button onClick={()=>setText('')} className="bg-white/20 border border-white/30 px-6 py-3 rounded-xl font-semibold hover:bg-white/30" whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}>Clear</motion.button>
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        <header className="mb-8">
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">Notes</h1>
+          <p className="text-cyan-100/80 mt-2">
+            {algorithm ? `Algorithm: ${algorithm.title}` : `Algorithm: ${paramId}`}
+          </p>
+        </header>
+        {algorithm && (
+          <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-6 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
+            <textarea 
+              value={text} 
+              onChange={e=>setText(e.target.value)} 
+              rows={5} 
+              placeholder="Write your note about the algorithm..." 
+              className="w-full rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 p-4 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" 
+            />
+            <div className="mt-4 flex gap-3">
+              <motion.button 
+                onClick={save} 
+                disabled={saving || !text.trim()}
+                className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all" 
+                whileHover={{ scale: saving ? 1 : 1.02 }} 
+                whileTap={{ scale: saving ? 1 : 0.98 }}
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </motion.button>
+              <motion.button 
+                onClick={()=>setText('')} 
+                className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-6 py-3 rounded-xl font-semibold hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all" 
+                whileHover={{ scale:1.02 }} 
+                whileTap={{ scale:0.98 }}
+              >
+                Clear
+              </motion.button>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="mt-6 space-y-4">
           {notes.map(n => (
-            <motion.div key={n.id} className="bg-white/10 backdrop-blur rounded-2xl p-5 border border-white/20 flex items-start justify-between" initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}>
-              <div>
-                <div className="text-sm text-white/70">{new Date(n.createdAt).toLocaleString()}</div>
-                <div className="mt-1 whitespace-pre-wrap">{n.text}</div>
-              </div>
-              <button onClick={()=>remove(n.id)} className="text-sm bg-white/20 border border-white/30 px-3 py-1 rounded-lg hover:bg-white/30">Delete</button>
+            <motion.div 
+              key={n.id} 
+              className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all" 
+              initial={{ opacity:0, y:10 }} 
+              animate={{ opacity:1, y:0 }}
+            >
+              {editingNote === n.id ? (
+                <div>
+                  <textarea 
+                    value={editText} 
+                    onChange={e => setEditText(e.target.value)} 
+                    rows={4} 
+                    className="w-full rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 p-4 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all mb-3" 
+                  />
+                  <div className="flex gap-3">
+                    <motion.button 
+                      onClick={() => updateNote(n.id)} 
+                      disabled={saving || !editText.trim()}
+                      className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 px-4 py-2 rounded-lg font-semibold shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all" 
+                      whileHover={{ scale: saving ? 1 : 1.02 }} 
+                      whileTap={{ scale: saving ? 1 : 0.98 }}
+                    >
+                      {saving ? 'Saving...' : 'Save'}
+                    </motion.button>
+                    <motion.button 
+                      onClick={cancelEdit} 
+                      className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-4 py-2 rounded-lg font-semibold hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all" 
+                      whileHover={{ scale: 1.02 }} 
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Cancel
+                    </motion.button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="text-sm text-cyan-300/70 mb-2 flex items-center gap-2">
+                      <span>{new Date(n.createdAt).toLocaleString()}</span>
+                      {n.Algorithm && (
+                        <span className="text-xs bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded border border-cyan-500/30">
+                          {n.Algorithm.title}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-1 whitespace-pre-wrap text-slate-200">{n.content}</div>
+                  </div>
+                  <div className="flex gap-2 ml-4">
+                    <button 
+                      onClick={() => startEdit(n)} 
+                      className="text-sm bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-3 py-1 rounded-lg hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all"
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => remove(n.id)} 
+                      className="text-sm bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-3 py-1 rounded-lg hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
             </motion.div>
           ))}
-          {!notes.length && <div className="text-white/80">No notes yet. Save your first note above.</div>}
+          {!notes.length && (
+            <div className="text-slate-300/80 text-center py-8">
+              {algorithm ? 'No notes yet. Save your first note above.' : 'Algorithm not found or no notes available.'}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -6,10 +6,11 @@ import { useAuth } from '../context/AuthContext';
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex flex-col items-center justify-center text-white text-center p-6 relative overflow-hidden">
-      {/* Animated background shapes - soft floating blobs */}
+    <div className="min-h-screen flex flex-col items-center justify-center text-center p-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)', color: '#e0f7ff', fontFamily: "'Poppins', sans-serif" }}>
+      {/* Animated background shapes - cyan/teal floating blobs */}
       <motion.div
-        className="absolute top-20 left-10 w-40 h-40 bg-pink-300 rounded-full opacity-30 blur-3xl"
+        className="absolute top-20 left-10 w-40 h-40 rounded-full opacity-20 blur-3xl"
+        style={{ background: '#00ffff' }}
         animate={{ 
           y: [0, 30, 0], 
           x: [0, 20, 0],
@@ -22,7 +23,8 @@ export default function LandingPage() {
         }}
       />
       <motion.div
-        className="absolute bottom-20 right-10 w-60 h-60 bg-yellow-300 rounded-full opacity-30 blur-3xl"
+        className="absolute bottom-20 right-10 w-60 h-60 rounded-full opacity-20 blur-3xl"
+        style={{ background: '#00ffff' }}
         animate={{ 
           y: [0, -40, 0], 
           x: [0, -15, 0],
@@ -35,7 +37,8 @@ export default function LandingPage() {
         }}
       />
       <motion.div
-        className="absolute top-1/2 left-1/4 w-32 h-32 bg-purple-300 rounded-full opacity-25 blur-3xl"
+        className="absolute top-1/2 left-1/4 w-32 h-32 rounded-full opacity-15 blur-3xl"
+        style={{ background: '#00ffff' }}
         animate={{ 
           y: [0, -25, 0], 
           x: [0, 30, 0],
@@ -50,7 +53,8 @@ export default function LandingPage() {
 
       {/* Title - animated from top */}
       <motion.h1
-        className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 drop-shadow-2xl [text-shadow:0_0_30px_rgba(255,255,255,0.5),0_0_60px_rgba(255,255,255,0.3)]"
+        className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 drop-shadow-2xl"
+        style={{ color: '#e0f7ff', textShadow: '0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.3)' }}
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: "easeOut" }}
@@ -60,7 +64,8 @@ export default function LandingPage() {
 
       {/* Tagline - animated from bottom */}
       <motion.p
-        className="text-lg sm:text-xl md:text-2xl max-w-2xl mb-12 text-white/95 font-medium"
+        className="text-lg sm:text-xl md:text-2xl max-w-2xl mb-12 font-medium"
+        style={{ color: '#e0f7ff', opacity: 0.95 }}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
@@ -78,14 +83,19 @@ export default function LandingPage() {
         {/* Get Started Button - with pulsing animation */}
         <Link to={isAuthenticated ? "/dashboard" : "/login"}>
         <motion.button
-          className="bg-white text-purple-600 hover:bg-purple-50 font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all duration-300 relative"
+          className="font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300 relative"
+          style={{ 
+            background: '#e0f7ff', 
+            color: '#0f2027',
+            boxShadow: '0 10px 30px rgba(0, 255, 255, 0.3)'
+          }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           animate={{
             boxShadow: [
-              "0 10px 30px rgba(255, 255, 255, 0.3)",
-              "0 10px 40px rgba(255, 255, 255, 0.5)",
-              "0 10px 30px rgba(255, 255, 255, 0.3)"
+              "0 10px 30px rgba(0, 255, 255, 0.3)",
+              "0 10px 40px rgba(0, 255, 255, 0.5)",
+              "0 10px 30px rgba(0, 255, 255, 0.3)"
             ]
           }}
           transition={{
@@ -103,8 +113,13 @@ export default function LandingPage() {
         {/* Login Button */}
         <Link to="/login">
           <motion.button
-            className="bg-transparent border-2 border-white hover:bg-white/20 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
-            whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
+            className="font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
+            style={{ 
+              background: 'transparent', 
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              color: '#e0f7ff'
+            }}
+            whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
             whileTap={{ scale: 0.95 }}
           >
             Login
@@ -114,8 +129,13 @@ export default function LandingPage() {
         {/* About Button */}
         <Link to="/about">
           <motion.button
-            className="bg-transparent border-2 border-white hover:bg-white/20 font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
-            whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
+            className="font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
+            style={{ 
+              background: 'transparent', 
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              color: '#e0f7ff'
+            }}
+            whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.1)" }}
             whileTap={{ scale: 0.95 }}
           >
             About
@@ -125,7 +145,8 @@ export default function LandingPage() {
 
       {/* Footer - subtle animation */}
       <motion.footer
-        className="absolute bottom-10 text-sm text-white/70"
+        className="absolute bottom-10 text-sm"
+        style={{ color: '#e0f7ff', opacity: 0.7 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: [0.5, 0.8, 0.5] }}
         transition={{ 
