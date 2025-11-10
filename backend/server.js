@@ -35,6 +35,7 @@ sequelize.sync({ alter: true }).then(async () => {
       { title: "Merge Sort", category: "Sorting", description: "Divide and conquer merge", complexity: "O(n log n)", slug: "merge-sort" },
       { title: "Insertion Sort", category: "Sorting", description: "Builds sorted array one element at a time", complexity: "O(n^2)", slug: "insertion-sort" },
       { title: "Binary Search", category: "Searching", description: "Search in sorted array", complexity: "O(log n)", slug: "binary-search" },
+      { title: "Linear Search", category: "Searching", description: "Sequential search in array", complexity: "O(n)", slug: "linear-search" },
       { title: "Breadth-First Search", category: "Graph", description: "Layer-by-layer traversal", complexity: "O(V+E)", slug: "bfs" },
       { title: "Depth-First Search", category: "Graph", description: "Depth traversal", complexity: "O(V+E)", slug: "dfs" },
       { title: "Dijkstra's Algorithm", category: "Graph", description: "Shortest path in weighted graph", complexity: "O((V+E) log V)", slug: "dijkstra" },
@@ -52,6 +53,18 @@ sequelize.sync({ alter: true }).then(async () => {
         slug: "insertion-sort"
       });
       console.log("Insertion Sort added to database ✅");
+    }
+
+    const linearSearch = await Algorithm.findOne({ where: { slug: "linear-search" } });
+    if (!linearSearch) {
+      await Algorithm.create({
+        title: "Linear Search",
+        category: "Searching",
+        description: "Sequential search in array",
+        complexity: "O(n)",
+        slug: "linear-search"
+      });
+      console.log("Linear Search added to database ✅");
     }
   }
 

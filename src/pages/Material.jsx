@@ -16,6 +16,10 @@ const content = {
     title: 'Binary Search',
     body: 'Binary search halves the search space each step by comparing the target to the middle element in a sorted array.'
   },
+  'linear-search': {
+    title: 'Linear Search',
+    body: 'Linear search sequentially checks each element in the array from start to end until the target is found or the array is exhausted. It works on both sorted and unsorted arrays, making it simple but less efficient than binary search for large sorted datasets. Time complexity is O(n) in the worst case and O(1) in the best case (when the target is at the first position), with O(1) space complexity.'
+  },
   'bfs': {
     title: 'Breadth-First Search',
     body: 'BFS explores neighbors first, then moves to the next level. Useful for shortest paths in unweighted graphs.'

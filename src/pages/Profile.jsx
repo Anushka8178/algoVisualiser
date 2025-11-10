@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 
@@ -104,21 +105,39 @@ export default function Profile(){
             <div className="text-slate-300/80">No activity yet. Start learning algorithms!</div>
           ) : (
             <ul className="space-y-2">
-              {history.map((activity, idx) => (
-                <li key={idx} className="text-slate-200 flex items-center gap-2 py-2 border-b border-cyan-500/10 last:border-0">
-                  <span className="text-cyan-400">
-                    {activity.activityType === 'completed' && '✅'}
-                    {activity.activityType === 'viewed' && '👁️'}
-                    {activity.activityType === 'note_created' && '📝'}
-                  </span>
-                  <span className="flex-1">
-                    {activity.Algorithm ? activity.Algorithm.title : 'Unknown Algorithm'}
-                  </span>
-                  <span className="text-slate-400 text-sm">
-                    {new Date(activity.completedAt).toLocaleDateString()}
-                  </span>
-                </li>
-              ))}
+              {history.map((activity, idx) => {
+                const algorithm = activity.Algorithm;
+                if (!algorithm) return null;
+                
+                let linkPath = '';
+                if (activity.activityType === 'completed') {
+                  linkPath = `/visualize/${algorithm.slug}`;
+                } else if (activity.activityType === 'viewed') {
+                  linkPath = `/material/${algorithm.slug}`;
+                } else if (activity.activityType === 'note_created') {
+                  linkPath = `/notes/${algorithm.slug}`;
+                }
+                
+                return (
+                  <Link
+                    key={idx}
+                    to={linkPath}
+                    className="block text-slate-200 flex items-center gap-2 py-2 px-2 rounded-lg border-b border-cyan-500/10 last:border-0 hover:bg-slate-700/30 hover:border-cyan-500/30 transition-all cursor-pointer"
+                  >
+                    <span className="text-cyan-400">
+                      {activity.activityType === 'completed' && '✅'}
+                      {activity.activityType === 'viewed' && '👁️'}
+                      {activity.activityType === 'note_created' && '📝'}
+                    </span>
+                    <span className="flex-1 hover:text-cyan-300 transition-colors">
+                      {algorithm.title}
+                    </span>
+                    <span className="text-slate-400 text-sm">
+                      {new Date(activity.completedAt).toLocaleDateString()}
+                    </span>
+                  </Link>
+                );
+              })}
             </ul>
           )}
         </div>

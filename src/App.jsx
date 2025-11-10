@@ -18,6 +18,7 @@ import QuickSortViz from "./visualizations/QuickSortViz";
 import MergeSortViz from "./visualizations/MergeSortViz";
 import InsertionSortViz from "./visualizations/InsertionSortViz";
 import BinarySearchViz from "./visualizations/BinarySearchViz";
+import LinearSearchViz from "./visualizations/LinearSearchViz";
 import BFSSearchViz from "./visualizations/BFSSearchViz";
 import DFSSearchViz from "./visualizations/DFSSearchViz";
 import DijkstraViz from "./visualizations/DijkstraViz";
@@ -44,6 +45,7 @@ function App() {
             <Route path="/visualize/merge-sort" element={<MergeSortViz />} />
             <Route path="/visualize/insertion-sort" element={<InsertionSortViz />} />
             <Route path="/visualize/binary-search" element={<BinarySearchViz />} />
+            <Route path="/visualize/linear-search" element={<LinearSearchViz />} />
             <Route path="/visualize/bfs" element={<BFSSearchViz />} />
             <Route path="/visualize/dfs" element={<DFSSearchViz />} />
             <Route path="/visualize/dijkstra" element={<DijkstraViz />} />
