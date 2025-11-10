@@ -1,8 +1,5 @@
 # 🧮 Algorithm Visualizer
 
-[![License](https://img.shields.io/badge/license-Academic-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/postgres-%3E%3D15-blue.svg)](https://www.postgresql.org/)
 
 ## 🧭 Table of Contents
 
@@ -29,27 +26,27 @@ The app also introduces gamification, letting users build learning streaks, comp
 
 ## ✨ Features
 
-### 🎬 Algorithm Visualizations
+### Algorithm Visualizations
 
 - **Sorting**: Bubble, Quick, Merge, Insertion, Heap
 - **Searching**: Linear, Binary
 - **Graph**: BFS, DFS, Dijkstra
-- **Pathfinding** (A*, Maze) - *Planned*
+- **More algorithms like pathfinding,linked list etc** - *Planned*
 
-### 🕹️ Gamification
+### Gamification
 
 - Daily streak tracking
 - Leaderboards based on engagement
 - Progress history and resume tracking
 
-### 🧠 User Features
+### User Features
 
 - Secure authentication (JWT-based)
 - Personalized notes for each algorithm
 - Profile with learning statistics
 - Algorithm theory/material pages
 
-### 💅 UI/UX
+### UI/UX
 
 - Fully responsive layout
 - Smooth animations with Framer Motion
@@ -88,7 +85,7 @@ git clone https://github.com/Anushka8178/algoVisualiser.git
 cd algoVisualiser
 ```
 
-### 📦 Step 2: Install Dependencies
+### Step 2: Install Dependencies
 
 **Frontend:**
 
@@ -137,13 +134,13 @@ PORT=5000
 JWT_SECRET=your_random_secret_key_here
 ```
 
-💡 **Generate a secret key easily:**
+** To generate a secret key easily:**
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-> 📝 **Note:** You can also copy `backend/ENV_EXAMPLE.txt` and rename it to `.env`, then fill in your values.
+> ** You can also copy `backend/ENV_EXAMPLE.txt` and rename it to `.env`, then fill in your values.
 
 ### 🚀 Step 5: Run the App
 
@@ -178,15 +175,15 @@ VITE v5.x.x  ready in xxx ms
 ➜  Local:   http://localhost:5173/
 ```
 
-**Now open 👉 [http://localhost:5173](http://localhost:5173) in your browser!**
+**Now open  [http://localhost:5173](http://localhost:5173) in your browser**
 
 ### 🧠 Step 6: Test It Out
 
-- 📝 **Register** → Create a test account
-- 🔑 **Login** → Access your dashboard
-- 🧮 **Visualize Algorithms** → See step-by-step animations
-- ✍️ **Add Notes** → Save personal insights
-- 🏆 **Track Progress** → Watch streaks grow!
+- **Register** → Create a test account
+- **Login** → Access your dashboard
+- **Visualize Algorithms** → See step-by-step animations
+- **Add Notes** → Save personal insights
+- **Track Progress** → Watch streaks grow!
 
 ---
 
@@ -202,7 +199,7 @@ VITE v5.x.x  ready in xxx ms
 
 ---
 
-## 🧾 Quick Reference
+##  Quick Reference
 
 | Command | Description |
 |---------|-------------|
@@ -220,7 +217,6 @@ app:
   name: Algorithm Visualizer
   version: 1.0.0-MVP
   status: Development (Local Build)
-  build_date: 2025-11-08
   platform: Web
   access_modes:
     - local
@@ -268,7 +264,7 @@ features:
     - Sorting (Bubble, Merge, Quick, Insertion, Heap)
     - Searching (Linear, Binary)
     - Graph (BFS, DFS, Dijkstra)
-    - Pathfinding (A*, Maze) - planned
+    - Pathfinding - planned
   visualization:
     engine: D3.js
     controls: Play, Pause, Step, Speed (0.5x–2x)
@@ -319,14 +315,13 @@ tech:
 | **Meghna Binod** | AM.SC.U4CSE23135 | Frontend & Database Administrator |
 
 **Contact:**
-- Email: algoviz.cse@amrita.edu
 - GitHub: [@Anushka8178](https://github.com/Anushka8178)
 
 ---
 
 ## 🚀 Upcoming Plans
 
-- [ ] Pathfinding algorithms (A*, Maze generation)
+- [ ] Other DSA Algorithms (A*, Maze generation)
 - [ ] Online deployment (Netlify + Render)
 - [ ] Additional sorting algorithms
 - [ ] User preferences and settings
@@ -335,10 +330,6 @@ tech:
 - [ ] Mobile app (React Native)
 
 ---
-
-## 📄 License
-
-This project is part of an academic assignment for **Software Engineering (23CSE311)** at **Amrita School of Computing, Amritapuri**.
 
 ---
 
@@ -351,15 +342,7 @@ This project is part of an academic assignment for **Software Engineering (23CSE
 
 ---
 
-## 🆘 Getting Help
 
-If you encounter issues:
-
-1. Check the [Common Issues](#-common-issues) section above
-2. Review [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md) for detailed troubleshooting
-3. Check the terminal/console for error messages
-4. Verify all prerequisites are installed correctly
-5. Ensure both frontend and backend are running
 
 ---
 
