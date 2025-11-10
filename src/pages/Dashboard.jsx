@@ -19,13 +19,19 @@ export default function Dashboard(){
         if (response.ok) {
           const data = await response.json();
 
-          const mapped = data.map(algo => ({
-            id: algo.slug,
-            title: algo.title,
-            category: algo.category,
-            desc: algo.description,
-            complexity: algo.complexity,
-          }));
+          const mapped = data
+            .filter(algo => 
+              algo.slug !== 'inorder-traversal' && 
+              algo.slug !== 'preorder-traversal' && 
+              algo.slug !== 'postorder-traversal'
+            )
+            .map(algo => ({
+              id: algo.slug,
+              title: algo.title,
+              category: algo.category,
+              desc: algo.description,
+              complexity: algo.complexity,
+            }));
           setAlgorithms(mapped);
         }
       } catch (error) {

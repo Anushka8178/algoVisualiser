@@ -17,6 +17,7 @@ import BubbleSortViz from "./visualizations/BubbleSortViz";
 import QuickSortViz from "./visualizations/QuickSortViz";
 import MergeSortViz from "./visualizations/MergeSortViz";
 import InsertionSortViz from "./visualizations/InsertionSortViz";
+import HeapSortViz from "./visualizations/HeapSortViz";
 import BinarySearchViz from "./visualizations/BinarySearchViz";
 import LinearSearchViz from "./visualizations/LinearSearchViz";
 import BFSSearchViz from "./visualizations/BFSSearchViz";
@@ -44,6 +45,7 @@ function App() {
             <Route path="/visualize/quick-sort" element={<QuickSortViz />} />
             <Route path="/visualize/merge-sort" element={<MergeSortViz />} />
             <Route path="/visualize/insertion-sort" element={<InsertionSortViz />} />
+            <Route path="/visualize/heap-sort" element={<HeapSortViz />} />
             <Route path="/visualize/binary-search" element={<BinarySearchViz />} />
             <Route path="/visualize/linear-search" element={<LinearSearchViz />} />
             <Route path="/visualize/bfs" element={<BFSSearchViz />} />

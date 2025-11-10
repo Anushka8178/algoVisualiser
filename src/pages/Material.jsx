@@ -39,6 +39,10 @@ const content = {
   'insertion-sort': {
     title: 'Insertion Sort',
     body: 'Insertion sort builds a sorted array one element at a time by taking each element and inserting it into its correct position in the already sorted portion. It is efficient for small datasets and nearly sorted arrays. Time complexity is O(n²) in the worst case and O(n) for nearly sorted arrays, with O(1) space complexity.'
+  },
+  'heap-sort': {
+    title: 'Heap Sort',
+    body: 'Heap sort is a comparison-based sorting algorithm that uses a binary heap data structure. It first builds a max heap from the array, then repeatedly extracts the maximum element and places it at the end of the sorted portion. Heap sort has a guaranteed O(n log n) time complexity in all cases and O(1) space complexity, making it efficient and stable in performance.'
   }
 };
 

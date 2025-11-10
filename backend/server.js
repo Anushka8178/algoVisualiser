@@ -34,6 +34,7 @@ sequelize.sync({ alter: true }).then(async () => {
       { title: "Quick Sort", category: "Sorting", description: "Divide and conquer sort", complexity: "O(n log n)", slug: "quick-sort" },
       { title: "Merge Sort", category: "Sorting", description: "Divide and conquer merge", complexity: "O(n log n)", slug: "merge-sort" },
       { title: "Insertion Sort", category: "Sorting", description: "Builds sorted array one element at a time", complexity: "O(n^2)", slug: "insertion-sort" },
+      { title: "Heap Sort", category: "Sorting", description: "Sort using binary heap data structure", complexity: "O(n log n)", slug: "heap-sort" },
       { title: "Binary Search", category: "Searching", description: "Search in sorted array", complexity: "O(log n)", slug: "binary-search" },
       { title: "Linear Search", category: "Searching", description: "Sequential search in array", complexity: "O(n)", slug: "linear-search" },
       { title: "Breadth-First Search", category: "Graph", description: "Layer-by-layer traversal", complexity: "O(V+E)", slug: "bfs" },
@@ -53,6 +54,18 @@ sequelize.sync({ alter: true }).then(async () => {
         slug: "insertion-sort"
       });
       console.log("Insertion Sort added to database ✅");
+    }
+
+    const heapSort = await Algorithm.findOne({ where: { slug: "heap-sort" } });
+    if (!heapSort) {
+      await Algorithm.create({
+        title: "Heap Sort",
+        category: "Sorting",
+        description: "Sort using binary heap data structure",
+        complexity: "O(n log n)",
+        slug: "heap-sort"
+      });
+      console.log("Heap Sort added to database ✅");
     }
 
     const linearSearch = await Algorithm.findOne({ where: { slug: "linear-search" } });

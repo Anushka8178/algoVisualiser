@@ -7,6 +7,7 @@ import BubbleSortViz from '../visualizations/BubbleSortViz';
 import QuickSortViz from '../visualizations/QuickSortViz';
 import MergeSortViz from '../visualizations/MergeSortViz';
 import InsertionSortViz from '../visualizations/InsertionSortViz';
+import HeapSortViz from '../visualizations/HeapSortViz';
 import BinarySearchViz from '../visualizations/BinarySearchViz';
 import LinearSearchViz from '../visualizations/LinearSearchViz';
 import BFSSearchViz from '../visualizations/BFSSearchViz';
@@ -24,6 +25,7 @@ export default function Visualize() {
       case 'quick-sort': return <QuickSortViz showNavbar={false} showNavigator={false} />;
       case 'merge-sort': return <MergeSortViz showNavbar={false} showNavigator={false} />;
       case 'insertion-sort': return <InsertionSortViz showNavbar={false} showNavigator={false} />;
+      case 'heap-sort': return <HeapSortViz showNavbar={false} showNavigator={false} />;
       case 'binary-search': return <BinarySearchViz showNavbar={false} showNavigator={false} />;
       case 'linear-search': return <LinearSearchViz showNavbar={false} showNavigator={false} />;
       case 'bfs': return <BFSSearchViz showNavbar={false} showNavigator={false} />;
@@ -53,7 +55,7 @@ export default function Visualize() {
         </motion.div>
 
         {}
-        {!['bubble-sort', 'insertion-sort', 'merge-sort', 'quick-sort', 'binary-search', 'linear-search', 'bfs', 'dfs', 'dijkstra'].includes(id) && (
+        {!['bubble-sort', 'insertion-sort', 'heap-sort', 'merge-sort', 'quick-sort', 'binary-search', 'linear-search', 'bfs', 'dfs', 'dijkstra'].includes(id) && (
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
               <div className="text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Time Complexity</div>
@@ -89,6 +91,7 @@ function formatTitle(id) {
     'quick-sort': 'Quick Sort',
     'merge-sort': 'Merge Sort',
     'insertion-sort': 'Insertion Sort',
+    'heap-sort': 'Heap Sort',
     'binary-search': 'Binary Search',
     'linear-search': 'Linear Search'
   };
@@ -109,6 +112,7 @@ function getTimeComplexity(id) {
     'quick-sort': 'O(n log n)',
     'merge-sort': 'O(n log n)',
     'insertion-sort': 'O(n²)',
+    'heap-sort': 'O(n log n)',
     'binary-search': 'O(log n)',
     'linear-search': 'O(n)',
     'bfs': 'O(V + E)',
@@ -124,6 +128,7 @@ function getSpaceComplexity(id) {
     'quick-sort': 'O(n)',
     'merge-sort': 'O(n)',
     'insertion-sort': 'O(1)',
+    'heap-sort': 'O(1)',
     'binary-search': 'O(1)',
     'linear-search': 'O(1)',
     'bfs': 'O(V)',
