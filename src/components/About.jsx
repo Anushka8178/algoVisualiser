@@ -4,44 +4,44 @@ import { Link } from 'react-router-dom';
 export default function About() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
-      {/* Animated background shapes */}
+      {}
       <motion.div
         className="absolute top-20 left-10 w-40 h-40 bg-cyan-500 rounded-full opacity-20 blur-3xl"
-        animate={{ 
-          y: [0, 30, 0], 
+        animate={{
+          y: [0, 30, 0],
           x: [0, 20, 0],
-          scale: [1, 1.1, 1] 
+          scale: [1, 1.1, 1]
         }}
-        transition={{ 
-          duration: 8, 
+        transition={{
+          duration: 8,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
       <motion.div
         className="absolute bottom-20 right-10 w-60 h-60 bg-teal-500 rounded-full opacity-20 blur-3xl"
-        animate={{ 
-          y: [0, -40, 0], 
+        animate={{
+          y: [0, -40, 0],
           x: [0, -15, 0],
-          scale: [1, 1.15, 1] 
+          scale: [1, 1.15, 1]
         }}
-        transition={{ 
-          duration: 10, 
+        transition={{
+          duration: 10,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
 
-      {/* Back to Home Button */}
-      <Link 
-        to="/" 
+      {}
+      <Link
+        to="/"
         className="absolute top-6 left-6 z-10 text-cyan-300/80 hover:text-cyan-200 transition-colors flex items-center gap-2"
       >
         <span>←</span> Back to Home
       </Link>
 
       <div className="container mx-auto px-6 py-20 max-w-4xl">
-        {/* Header */}
+        {}
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: -30 }}
@@ -56,7 +56,7 @@ export default function About() {
           </p>
         </motion.div>
 
-        {/* Content Cards */}
+        {}
         <div className="space-y-8">
           <motion.div
             className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-8 border border-cyan-500/20 shadow-xl shadow-cyan-900/20"
@@ -66,8 +66,8 @@ export default function About() {
           >
             <h2 className="text-3xl font-bold mb-4 text-cyan-300">🎯 Our Mission</h2>
             <p className="text-slate-200 leading-relaxed">
-              Algorithm Visualizer is designed to help students and developers understand algorithms 
-              through interactive visualization. We believe that seeing algorithms in action makes 
+              Algorithm Visualizer is designed to help students and developers understand algorithms
+              through interactive visualization. We believe that seeing algorithms in action makes
               complex concepts easier to grasp and remember.
             </p>
           </motion.div>
@@ -121,7 +121,7 @@ export default function About() {
           </motion.div>
         </div>
 
-        {/* Footer */}
+        {}
         <motion.div
           className="mt-16 text-center text-slate-300/70"
           initial={{ opacity: 0 }}

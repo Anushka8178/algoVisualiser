@@ -15,7 +15,6 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
   const [weightInput, setWeightInput] = useState("1");
   const [undoStack, setUndoStack] = useState([]);
 
-  // Build weighted adjacency list
   const graph = useMemo(() => {
     const g = {};
     nodes.forEach((n) => (g[n.id] = []));
@@ -33,17 +32,16 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
   const { index, playing, play, pause, reset, stepForward, stepBackward, speed, setSpeed } =
     usePlayer(actions, 900);
 
-  // Draw Graph
   useEffect(() => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
     const width = 800, height = 500;
 
-    const colorSettled = "#10b981"; // emerald green - finalized
-    const colorCurrent = "#f59e0b"; // amber orange - being processed
-    const colorRelaxing = "#a855f7"; // purple - edge being relaxed
-    const colorStart = "#eab308"; // yellow
-    const colorDefault = "#cbd5e1"; // slate-300
+    const colorSettled = "#10b981";
+    const colorCurrent = "#f59e0b";
+    const colorRelaxing = "#a855f7";
+    const colorStart = "#eab308";
+    const colorDefault = "#cbd5e1";
 
     let highlights = {
       current: null,
@@ -80,15 +78,18 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
         highlights.relaxing = null;
         highlights.settled = new Set(a.visited || []);
         highlights.distances = a.distances || {};
-        message = `🎉 Dijkstra Completed!`;
+        const distancesList = Object.entries(a.distances || {})
+          .filter(([_, dist]) => dist !== Infinity)
+          .map(([node, dist]) => `${node}: ${dist}`)
+          .join(", ");
+        message = `🎉 Dijkstra Completed! Distances: ${distancesList || "None"}`;
       }
     }
 
-    // Draw edges (using merge to update on drag)
     const edges = svg
       .selectAll("line")
       .data(links);
-    
+
     edges.enter()
       .append("line")
       .merge(edges)
@@ -97,16 +98,16 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("x2", (d) => d.target.x)
       .attr("y2", (d) => d.target.y)
       .attr("stroke", (d) => {
-        if (highlights.relaxing && 
-            highlights.relaxing.from === d.source.id && 
+        if (highlights.relaxing &&
+            highlights.relaxing.from === d.source.id &&
             highlights.relaxing.to === d.target.id) {
           return "#a855f7";
         }
         return "#94a3b8";
       })
       .attr("stroke-width", (d) => {
-        if (highlights.relaxing && 
-            highlights.relaxing.from === d.source.id && 
+        if (highlights.relaxing &&
+            highlights.relaxing.from === d.source.id &&
             highlights.relaxing.to === d.target.id) {
           return 4;
         }
@@ -114,14 +115,13 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       })
       .attr("opacity", 0.7)
       .attr("marker-end", "url(#arrow)");
-    
+
     edges.exit().remove();
 
-    // Edge weight labels (using merge to update on drag)
     const weightLabels = svg
       .selectAll(".weight-label")
       .data(links);
-    
+
     weightLabels.enter()
       .append("text")
       .attr("class", "weight-label")
@@ -135,10 +135,9 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("stroke", "#0f172a")
       .attr("stroke-width", "0.5px")
       .text((d) => d.weight || 1);
-    
+
     weightLabels.exit().remove();
 
-    // Arrowhead
     svg
       .append("defs")
       .append("marker")
@@ -153,97 +152,11 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("d", "M0,-5L10,0L0,5")
       .attr("fill", "#94a3b8");
 
-    // Drag behavior - track if actual drag occurred
-    let startX, startY;
-    const drag = d3.drag()
-      .on("start", function(event, d) {
-        startX = event.x;
-        startY = event.y;
-        dragStartedRef.current = false;
-        d3.select(this).raise().attr("stroke-width", 3.5);
-      })
-      .on("drag", function(event, d) {
-        // Only consider it a drag if moved more than 3 pixels
-        const dx = event.x - startX;
-        const dy = event.y - startY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance > 3) {
-          dragStartedRef.current = true;
-        }
-        
-        if (dragStartedRef.current) {
-          d.x = event.x;
-          d.y = event.y;
-          d3.select(this)
-            .attr("cx", d.x)
-            .attr("cy", d.y);
-          
-          // Update node label
-          svg.selectAll("text.node-label")
-            .filter((label) => label.id === d.id)
-            .attr("x", d.x)
-            .attr("y", d.y + 5);
-          
-          // Update distance labels
-          const dist = highlights.distances[d.id];
-          if (dist !== undefined) {
-            const text = dist === Infinity ? "∞" : dist.toString();
-            const textWidth = text.length * 9;
-            svg.selectAll(".distance-bg")
-              .filter((bg) => bg.id === d.id)
-              .attr("x", d.x - Math.max(22, textWidth / 2 + 8))
-              .attr("y", d.y - 58);
-            svg.selectAll(".distance-label")
-              .filter((label) => label.id === d.id)
-              .attr("x", d.x)
-              .attr("y", d.y - 45);
-          }
-          
-          // Update links
-          svg.selectAll("line")
-            .attr("x1", (l) => l.source.x)
-            .attr("y1", (l) => l.source.y)
-            .attr("x2", (l) => l.target.x)
-            .attr("y2", (l) => l.target.y);
-          
-          // Update weight labels
-          svg.selectAll(".weight-label")
-            .attr("x", (l) => (l.source.x + l.target.x) / 2)
-            .attr("y", (l) => (l.source.y + l.target.y) / 2 - 10);
-        }
-      })
-      .on("end", function(event, d) {
-        d3.select(this).attr("stroke-width", 2.5);
-        // Only update node position if there was actual dragging
-        if (dragStartedRef.current) {
-          setNodes((prev) => prev.map((n) => (n.id === d.id ? { ...n, x: d.x, y: d.y } : n)));
-        } else {
-          // If no drag occurred, treat it as a click
-          if (pendingWeight && pendingWeight.source.id !== d.id) {
-            const weight = parseFloat(weightInput) || 1;
-            const newLink = { source: pendingWeight.source, target: d, weight };
-            setUndoStack((prev) => [...prev, { type: "addLink", link: newLink }]);
-            setLinks((prev) => [...prev, newLink]);
-            setCreatingLink(null);
-            setPendingWeight(null);
-            setWeightInput("1");
-          } else if (creatingLink && creatingLink.id !== d.id) {
-            setPendingWeight({ source: creatingLink, target: d });
-          } else if (!startNode) {
-            setStartNode(d);
-          } else {
-            setCreatingLink(d);
-          }
-        }
-        dragStartedRef.current = false;
-      });
 
-    // Draw nodes (using merge to update on re-render)
     const circles = svg
       .selectAll("circle")
       .data(nodes);
-    
+
     circles.enter()
       .append("circle")
       .merge(circles)
@@ -258,16 +171,31 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       })
       .attr("stroke", "#475569")
       .attr("stroke-width", 2.5)
-      .style("cursor", "move")
-      .call(drag)
-    
+      .on("click", function(event, d) {
+        event.stopPropagation();
+        if (pendingWeight && pendingWeight.source.id !== d.id) {
+          const weight = parseFloat(weightInput) || 1;
+          const newLink = { source: pendingWeight.source, target: d, weight };
+          setUndoStack((prev) => [...prev, { type: "addLink", link: newLink }]);
+          setLinks((prev) => [...prev, newLink]);
+          setCreatingLink(null);
+          setPendingWeight(null);
+          setWeightInput("1");
+        } else if (creatingLink && creatingLink.id !== d.id) {
+          setPendingWeight({ source: creatingLink, target: d });
+        } else if (!startNode) {
+          setStartNode(d);
+        } else {
+          setCreatingLink(d);
+        }
+      })
+
     circles.exit().remove();
 
-    // Node labels (ID) (with better contrast, using merge to update on drag)
     const nodeLabels = svg
       .selectAll(".node-label")
       .data(nodes, (d) => d.id);
-    
+
     nodeLabels.enter()
       .append("text")
       .attr("class", "node-label")
@@ -277,7 +205,7 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("y", (d) => d.y + 5)
       .attr("text-anchor", "middle")
       .attr("fill", (d) => {
-        // Use white text for colored nodes, dark for default nodes
+
         if (highlights.settled.has(d.id) || d.id === highlights.current || startNode?.id === d.id) {
           return "#ffffff";
         }
@@ -287,7 +215,7 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("font-weight", "bold")
       .attr("font-family", "system-ui, -apple-system, sans-serif")
       .attr("stroke", (d) => {
-        // Add stroke for better visibility on colored nodes
+
         if (highlights.settled.has(d.id) || d.id === highlights.current || startNode?.id === d.id) {
           return "rgba(0, 0, 0, 0.4)";
         }
@@ -295,19 +223,18 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       })
       .attr("stroke-width", "0.5px")
       .style("pointer-events", "none");
-    
+
     nodeLabels.exit().remove();
 
-    // Distance label backgrounds (for better visibility)
     const nodesWithDistances = nodes.filter(d => {
       const dist = highlights.distances[d.id];
       return dist !== undefined;
     });
-    
+
     const distanceBg = svg
       .selectAll(".distance-bg")
       .data(nodesWithDistances, d => d.id);
-    
+
     distanceBg.enter()
       .append("rect")
       .attr("class", "distance-bg")
@@ -315,7 +242,7 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("x", (d) => {
         const dist = highlights.distances[d.id];
         const text = dist === Infinity ? "∞" : dist.toString();
-        // Adjust width based on text length for better fit
+
         const textWidth = text.length * 9;
         return d.x - Math.max(22, textWidth / 2 + 8);
       })
@@ -334,14 +261,13 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("stroke-width", 2.5)
       .attr("opacity", 0.98)
       .style("pointer-events", "none");
-    
+
     distanceBg.exit().remove();
 
-    // Distance labels (improved visibility)
     const distanceLabels = svg
       .selectAll(".distance-label")
       .data(nodes, d => d.id);
-    
+
     distanceLabels.enter()
       .append("text")
       .attr("class", "distance-label")
@@ -361,10 +287,9 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("font-family", "Arial, Helvetica, sans-serif")
       .style("pointer-events", "none")
       .style("user-select", "none");
-    
+
     distanceLabels.exit().remove();
 
-    // Message background (moved to top for consistency)
     svg
       .append("rect")
       .attr("x", width / 2 - 240)
@@ -377,7 +302,6 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("stroke-width", 2)
       .attr("filter", "drop-shadow(0 2px 8px rgba(34, 211, 238, 0.3))");
 
-    // Message (moved to top for consistency)
     svg
       .append("text")
       .attr("x", width / 2)
@@ -390,9 +314,8 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .text(message);
   }, [nodes, links, index, startNode, creatingLink, actions, pendingWeight]);
 
-  // Create node on click
   useEffect(() => {
-    if (pendingWeight) return; // Don't create nodes when weight input is pending
+    if (pendingWeight) return;
     const svg = d3.select(svgRef.current);
     svg.on("click", function (event) {
       const [x, y] = d3.pointer(event);
@@ -403,11 +326,10 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
     });
   }, [nodes, pendingWeight]);
 
-  // Undo
   const handleUndo = () => {
     const last = undoStack[undoStack.length - 1];
     if (!last) return;
-    
+
     if (last.type === "addNode") {
       setNodes((prev) => prev.filter((n) => n.id !== last.node.id));
     } else if (last.type === "addLink") {
@@ -483,23 +405,33 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       )}
 
       <div className="flex flex-wrap justify-center gap-3 mb-4">
-        <button 
+        <button
           className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all"
           onClick={() => (playing ? pause() : play())}
         >
           {playing ? "Pause" : "Play"}
         </button>
-        <button 
+        <button
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
           onClick={stepBackward}
         >
           ◀
         </button>
-        <button 
+        <button
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
           onClick={stepForward}
         >
           ▶
+        </button>
+        <button
+          className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all"
+          onClick={() => {
+            reset();
+            setTimeout(() => play(), 100);
+          }}
+          disabled={actions.length === 0}
+        >
+          Replay
         </button>
         <button
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
@@ -515,7 +447,7 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
         >
           Reset
         </button>
-        <button 
+        <button
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
           onClick={handleUndo}
         >
@@ -543,13 +475,25 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
 
       <div className="mt-6 w-full max-w-4xl mx-auto">
         <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="text-center">
               <div className="text-sm font-semibold mb-1 text-cyan-300/70">Step Progress</div>
               <div className="text-2xl font-bold text-white">
                 {index + 1} <span className="text-lg text-cyan-400/60">/ {actions.length || 0}</span>
               </div>
             </div>
+            {index >= actions.length - 1 && actions[actions.length - 1]?.type === "done" && (
+              <div className="text-center">
+                <div className="text-sm font-semibold mb-1 text-cyan-300/70">Total Distances</div>
+                <div className="text-lg font-mono font-bold text-cyan-400 max-h-20 overflow-y-auto">
+                  {Object.entries(actions[actions.length - 1]?.distances || {})
+                    .filter(([_, dist]) => dist !== Infinity)
+                    .map(([node, dist]) => (
+                      <div key={node} className="text-sm">{node}: {dist}</div>
+                    ))}
+                </div>
+              </div>
+            )}
             <div className="text-center">
               <div className="text-sm font-semibold mb-1 text-cyan-300/70">Time Complexity</div>
               <div className="text-xl font-mono font-bold text-cyan-400">O((V+E) log V)</div>

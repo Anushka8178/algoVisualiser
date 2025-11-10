@@ -5,26 +5,25 @@ export function dijkstraSteps(graph, startNode) {
   const visited = new Set();
   const unvisited = new Set();
 
-  // Initialize distances
   Object.keys(graph).forEach(node => {
     distances[node] = node === startNode ? 0 : Infinity;
     previous[node] = null;
     unvisited.add(node);
   });
 
-  steps.push({ 
-    type: "start", 
-    node: startNode, 
+  steps.push({
+    type: "start",
+    node: startNode,
     distances: { ...distances },
     visited: [],
     unvisited: [...unvisited]
   });
 
   while (unvisited.size > 0) {
-    // Find node with minimum distance
+
     let current = null;
     let minDist = Infinity;
-    
+
     for (const node of unvisited) {
       if (distances[node] < minDist) {
         minDist = distances[node];
@@ -33,10 +32,9 @@ export function dijkstraSteps(graph, startNode) {
     }
 
     if (!current || distances[current] === Infinity) {
-      break; // No reachable nodes left
+      break;
     }
 
-    // Remove from unvisited and mark as visited
     unvisited.delete(current);
     visited.add(current);
 
@@ -49,7 +47,6 @@ export function dijkstraSteps(graph, startNode) {
       unvisited: [...unvisited]
     });
 
-    // Explore neighbors
     const neighbors = graph[current] || [];
     for (const neighbor of neighbors) {
       if (visited.has(neighbor.node)) continue;

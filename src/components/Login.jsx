@@ -29,43 +29,43 @@ export default function Login() {
   };
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      {/* Animated background shapes */}
+      {}
       <motion.div
         className="absolute top-20 left-10 w-40 h-40 bg-cyan-500 rounded-full opacity-20 blur-3xl"
-        animate={{ 
-          y: [0, 30, 0], 
+        animate={{
+          y: [0, 30, 0],
           x: [0, 20, 0],
-          scale: [1, 1.1, 1] 
+          scale: [1, 1.1, 1]
         }}
-        transition={{ 
-          duration: 8, 
+        transition={{
+          duration: 8,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
       <motion.div
         className="absolute bottom-20 right-10 w-60 h-60 bg-teal-500 rounded-full opacity-20 blur-3xl"
-        animate={{ 
-          y: [0, -40, 0], 
+        animate={{
+          y: [0, -40, 0],
           x: [0, -15, 0],
-          scale: [1, 1.15, 1] 
+          scale: [1, 1.15, 1]
         }}
-        transition={{ 
-          duration: 10, 
+        transition={{
+          duration: 10,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
 
-      {/* Back to Home Button */}
-      <Link 
-        to="/" 
+      {}
+      <Link
+        to="/"
         className="absolute top-6 left-6 text-cyan-300/80 hover:text-cyan-200 transition-colors flex items-center gap-2 z-10"
       >
         <span>←</span> Back to Home
       </Link>
 
-      {/* Login Form */}
+      {}
       <motion.div
         className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-8 md:p-12 w-full max-w-md border border-cyan-500/20 shadow-xl shadow-cyan-900/20"
         initial={{ opacity: 0, y: 30 }}

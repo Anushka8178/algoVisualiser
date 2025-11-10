@@ -7,7 +7,6 @@ import UserProgress from "../models/UserProgress.js";
 
 const router = express.Router();
 
-// Middleware for verifying JWT
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(403).json({ error: "No token provided" });
@@ -19,7 +18,6 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-// Track algorithm completion/view
 router.post("/complete", verifyToken, async (req, res) => {
   try {
     const { algorithmId, activityType = "completed" } = req.body;
@@ -28,7 +26,6 @@ router.post("/complete", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "Algorithm ID is required" });
     }
 
-    // Verify algorithm exists
     const algorithm = await Algorithm.findByPk(algorithmId);
     if (!algorithm) {
       return res.status(404).json({ error: "Algorithm not found" });
@@ -39,7 +36,6 @@ router.post("/complete", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Check if already completed today
     const today = new Date().toISOString().split("T")[0];
     const existingProgress = await UserProgress.findOne({
       where: {
@@ -61,17 +57,14 @@ router.post("/complete", verifyToken, async (req, res) => {
       });
     }
 
-    // Create progress record
     await UserProgress.create({
       userId: req.userId,
       algorithmId,
       activityType,
     });
 
-    // Update user engagement
     await user.increment("totalEngagement");
 
-    // Update streak
     const todayDate = new Date().toISOString().split("T")[0];
     const lastActive = user.lastActiveDate
       ? new Date(user.lastActiveDate).toISOString().split("T")[0]
@@ -83,17 +76,16 @@ router.post("/complete", verifyToken, async (req, res) => {
       const yesterdayStr = yesterday.toISOString().split("T")[0];
 
       if (lastActive === yesterdayStr) {
-        // Continue streak
+
         await user.increment("streak");
       } else if (lastActive !== todayDate) {
-        // Reset streak (missed a day)
+
         await user.update({ streak: 1 });
       }
 
       await user.update({ lastActiveDate: todayDate });
     }
 
-    // Return updated user data
     const updatedUser = await User.findByPk(req.userId, {
       attributes: ["id", "username", "streak", "totalEngagement", "lastActiveDate"],
     });
@@ -108,7 +100,6 @@ router.post("/complete", verifyToken, async (req, res) => {
   }
 });
 
-// Get user progress/history
 router.get("/history", verifyToken, async (req, res) => {
   try {
     const progress = await UserProgress.findAll({
@@ -120,7 +111,7 @@ router.get("/history", verifyToken, async (req, res) => {
         },
       ],
       order: [["completedAt", "DESC"]],
-      limit: 50, // Last 50 activities
+      limit: 50,
     });
 
     res.json(progress);
@@ -130,7 +121,6 @@ router.get("/history", verifyToken, async (req, res) => {
   }
 });
 
-// Get user stats
 router.get("/stats", verifyToken, async (req, res) => {
   try {
     const user = await User.findByPk(req.userId, {
@@ -141,7 +131,6 @@ router.get("/stats", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Count completed algorithms
     const completedCount = await UserProgress.count({
       where: {
         userId: req.userId,
@@ -151,7 +140,6 @@ router.get("/stats", verifyToken, async (req, res) => {
       col: "algorithmId",
     });
 
-    // Count total activities
     const totalActivities = await UserProgress.count({
       where: { userId: req.userId },
     });

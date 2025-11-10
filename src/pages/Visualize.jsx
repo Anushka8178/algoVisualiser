@@ -17,7 +17,6 @@ export default function Visualize() {
   const { hasCompleted } = useAuth();
   if (!hasCompleted(id)) return <Navigate to={`/material/${id}`} replace />;
 
-  // Render the appropriate visualization component
   const renderViz = () => {
     switch(id) {
       case 'bubble-sort': return <BubbleSortViz showNavbar={false} showNavigator={false} />;
@@ -42,7 +41,7 @@ export default function Visualize() {
           <p className="text-lg font-medium text-cyan-100/80">Visualize step-by-step execution</p>
         </header>
 
-        {/* ✅ Visualization section */}
+        {}
         <motion.div
           className=""
           initial={{ opacity: 0 }}
@@ -51,7 +50,7 @@ export default function Visualize() {
           {renderViz()}
         </motion.div>
 
-        {/* Info Section - Only show if visualization doesn't already include it */}
+        {}
         {!['bubble-sort', 'insertion-sort', 'merge-sort', 'quick-sort', 'binary-search', 'bfs', 'dfs', 'dijkstra'].includes(id) && (
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
@@ -79,8 +78,7 @@ export default function Visualize() {
 
 function formatTitle(id) {
   if (!id) return '';
-  
-  // Handle special cases
+
   const specialCases = {
     'bfs': 'Breadth-First Search',
     'dfs': 'Depth-First Search',
@@ -91,12 +89,11 @@ function formatTitle(id) {
     'insertion-sort': 'Insertion Sort',
     'binary-search': 'Binary Search'
   };
-  
+
   if (specialCases[id]) {
     return specialCases[id];
   }
-  
-  // Handle kebab-case (e.g., "bubble-sort" -> "Bubble Sort")
+
   return id
     .split('-')
     .map((s) => s[0].toUpperCase() + s.slice(1))

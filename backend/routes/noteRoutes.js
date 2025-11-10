@@ -7,7 +7,6 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// Middleware for verifying JWT
 const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(403).json({ error: "No token provided" });
@@ -19,7 +18,6 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-// Get notes for logged-in user (optionally filtered by algorithmId)
 router.get("/", verifyToken, async (req, res) => {
   try {
     const { algorithmId } = req.query;
@@ -27,7 +25,7 @@ router.get("/", verifyToken, async (req, res) => {
     if (algorithmId) {
       whereClause.algorithmId = algorithmId;
     }
-    
+
     const notes = await Note.findAll({
       where: whereClause,
       include: [
@@ -45,7 +43,6 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// Get notes by algorithm slug
 router.get("/algorithm/:slug", verifyToken, async (req, res) => {
   try {
     const algorithm = await Algorithm.findOne({
@@ -72,11 +69,10 @@ router.get("/algorithm/:slug", verifyToken, async (req, res) => {
   }
 });
 
-// Add a note
 router.post("/", verifyToken, async (req, res) => {
   try {
     const { algorithmId, content } = req.body;
-    
+
     if (!content || !content.trim()) {
       return res.status(400).json({ error: "Content is required" });
     }
@@ -85,7 +81,6 @@ router.post("/", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "Algorithm ID is required" });
     }
 
-    // Verify algorithm exists
     const algorithm = await Algorithm.findByPk(algorithmId);
     if (!algorithm) {
       return res.status(404).json({ error: "Algorithm not found" });
@@ -97,14 +92,12 @@ router.post("/", verifyToken, async (req, res) => {
       content: content.trim(),
     });
 
-    // Track note creation as engagement
     await UserProgress.create({
       userId: req.userId,
       algorithmId,
       activityType: "note_created",
     });
 
-    // Update user engagement
     const user = await User.findByPk(req.userId);
     if (user) {
       await user.increment("totalEngagement");
@@ -126,11 +119,10 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-// Update a note
 router.put("/:id", verifyToken, async (req, res) => {
   try {
     const { content } = req.body;
-    
+
     if (!content || !content.trim()) {
       return res.status(400).json({ error: "Content is required" });
     }
@@ -162,7 +154,6 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// Delete a note
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const note = await Note.findOne({

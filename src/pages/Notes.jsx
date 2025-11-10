@@ -29,25 +29,24 @@ export default function Notes(){
       }
 
       try {
-        // Fetch algorithm by slug
+
         const algoResponse = await fetch(`${API_URL}/algorithms/${paramId}`);
         if (algoResponse.ok) {
           const algoData = await algoResponse.json();
           setAlgorithm(algoData);
-          
-          // Fetch notes for this algorithm
+
           const notesResponse = await fetch(`${API_URL}/notes/algorithm/${paramId}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             },
           });
-          
+
           if (notesResponse.ok) {
             const notesData = await notesResponse.json();
             setNotes(notesData);
           }
         } else if (algoResponse.status === 404) {
-          // Algorithm not found, but still try to fetch notes
+
           const notesResponse = await fetch(`${API_URL}/notes`, {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -71,7 +70,7 @@ export default function Notes(){
 
   const save = async () => {
     if(!text.trim() || !algorithm || !token) return;
-    
+
     setSaving(true);
     try {
       const response = await fetch(`${API_URL}/notes`, {
@@ -115,7 +114,7 @@ export default function Notes(){
 
   const updateNote = async (id) => {
     if (!editText.trim() || !token) return;
-    
+
     setSaving(true);
     try {
       const response = await fetch(`${API_URL}/notes/${id}`, {
@@ -149,7 +148,7 @@ export default function Notes(){
 
   const remove = async (id) => {
     if (!token) return;
-    
+
     try {
       const response = await fetch(`${API_URL}/notes/${id}`, {
         method: 'DELETE',
@@ -193,27 +192,27 @@ export default function Notes(){
         </header>
         {algorithm && (
           <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-6 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
-            <textarea 
-              value={text} 
-              onChange={e=>setText(e.target.value)} 
-              rows={5} 
-              placeholder="Write your note about the algorithm..." 
-              className="w-full rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 p-4 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" 
+            <textarea
+              value={text}
+              onChange={e=>setText(e.target.value)}
+              rows={5}
+              placeholder="Write your note about the algorithm..."
+              className="w-full rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 p-4 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
             />
             <div className="mt-4 flex gap-3">
-              <motion.button 
-                onClick={save} 
+              <motion.button
+                onClick={save}
                 disabled={saving || !text.trim()}
-                className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all" 
-                whileHover={{ scale: saving ? 1 : 1.02 }} 
+                className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                whileHover={{ scale: saving ? 1 : 1.02 }}
                 whileTap={{ scale: saving ? 1 : 0.98 }}
               >
                 {saving ? 'Saving...' : 'Save'}
               </motion.button>
-              <motion.button 
-                onClick={()=>setText('')} 
-                className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-6 py-3 rounded-xl font-semibold hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all" 
-                whileHover={{ scale:1.02 }} 
+              <motion.button
+                onClick={()=>setText('')}
+                className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-6 py-3 rounded-xl font-semibold hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all"
+                whileHover={{ scale:1.02 }}
                 whileTap={{ scale:0.98 }}
               >
                 Clear
@@ -224,34 +223,34 @@ export default function Notes(){
 
         <div className="mt-6 space-y-4">
           {notes.map(n => (
-            <motion.div 
-              key={n.id} 
-              className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all" 
-              initial={{ opacity:0, y:10 }} 
+            <motion.div
+              key={n.id}
+              className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all"
+              initial={{ opacity:0, y:10 }}
               animate={{ opacity:1, y:0 }}
             >
               {editingNote === n.id ? (
                 <div>
-                  <textarea 
-                    value={editText} 
-                    onChange={e => setEditText(e.target.value)} 
-                    rows={4} 
-                    className="w-full rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 p-4 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all mb-3" 
+                  <textarea
+                    value={editText}
+                    onChange={e => setEditText(e.target.value)}
+                    rows={4}
+                    className="w-full rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 p-4 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all mb-3"
                   />
                   <div className="flex gap-3">
-                    <motion.button 
-                      onClick={() => updateNote(n.id)} 
+                    <motion.button
+                      onClick={() => updateNote(n.id)}
                       disabled={saving || !editText.trim()}
-                      className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 px-4 py-2 rounded-lg font-semibold shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all" 
-                      whileHover={{ scale: saving ? 1 : 1.02 }} 
+                      className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 px-4 py-2 rounded-lg font-semibold shadow-lg hover:shadow-cyan-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      whileHover={{ scale: saving ? 1 : 1.02 }}
                       whileTap={{ scale: saving ? 1 : 0.98 }}
                     >
                       {saving ? 'Saving...' : 'Save'}
                     </motion.button>
-                    <motion.button 
-                      onClick={cancelEdit} 
-                      className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-4 py-2 rounded-lg font-semibold hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all" 
-                      whileHover={{ scale: 1.02 }} 
+                    <motion.button
+                      onClick={cancelEdit}
+                      className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-4 py-2 rounded-lg font-semibold hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all"
+                      whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
                       Cancel
@@ -272,14 +271,14 @@ export default function Notes(){
                     <div className="mt-1 whitespace-pre-wrap text-slate-200">{n.content}</div>
                   </div>
                   <div className="flex gap-2 ml-4">
-                    <button 
-                      onClick={() => startEdit(n)} 
+                    <button
+                      onClick={() => startEdit(n)}
                       className="text-sm bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-3 py-1 rounded-lg hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all"
                     >
                       Edit
                     </button>
-                    <button 
-                      onClick={() => remove(n.id)} 
+                    <button
+                      onClick={() => remove(n.id)}
                       className="text-sm bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-3 py-1 rounded-lg hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all"
                     >
                       Delete
@@ -299,5 +298,4 @@ export default function Notes(){
     </div>
   );
 }
-
 

@@ -22,7 +22,6 @@ import BFSSearchViz from "./visualizations/BFSSearchViz";
 import DFSSearchViz from "./visualizations/DFSSearchViz";
 import DijkstraViz from "./visualizations/DijkstraViz";
 
-
 function App() {
   return (
     <ToastProvider>

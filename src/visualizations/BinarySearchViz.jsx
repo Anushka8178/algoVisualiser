@@ -65,7 +65,7 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
       if (a.type === "found") {
         highlights.found = a.index;
         message = `🎯 Found target ${arr[a.index]} at index ${a.index}`;
-        // when found, all other colors reset — everything neutral except found bar
+
         highlights.low = highlights.high = highlights.mid = null;
       }
 
@@ -74,7 +74,6 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
       }
     }
 
-    // Draw bars
     svg
       .selectAll("rect")
       .data(arr)
@@ -86,17 +85,16 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
       .attr("height", (d) => scaleY(d))
       .attr("rx", 6)
       .attr("fill", (_, i) => {
-        if (i === highlights.found) return "#10b981"; // emerald green when found
-        if (highlights.found !== null) return "#64748b"; // slate-500 neutral after found
-        if (i === highlights.mid) return "#f59e0b"; // amber orange for mid
-        if (i >= highlights.low && i <= highlights.high) return "#3b82f6"; // blue for range
-        return "#94a3b8"; // slate-400 for default bars
+        if (i === highlights.found) return "#10b981";
+        if (highlights.found !== null) return "#64748b";
+        if (i === highlights.mid) return "#f59e0b";
+        if (i >= highlights.low && i <= highlights.high) return "#3b82f6";
+        return "#94a3b8";
       })
       .transition()
       .duration(200)
       .ease(d3.easeCubicOut);
 
-    // Value labels (with better contrast)
     svg
       .selectAll("text.value")
       .data(arr)
@@ -107,7 +105,7 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
       .attr("x", (_, i) => i * barWidth + barWidth / 2)
       .attr("y", (d) => height - scaleY(d) - 10)
       .attr("fill", (_, i) => {
-        // Use white text for colored bars, dark for default bars
+
         if (i === highlights.found || i === highlights.mid || (i >= highlights.low && i <= highlights.high && highlights.found === null)) {
           return "#ffffff";
         }
@@ -117,7 +115,7 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
       .attr("font-weight", "bold")
       .attr("text-anchor", "middle")
       .attr("stroke", (_, i) => {
-        // Add stroke for better visibility on colored bars
+
         if (i === highlights.found || i === highlights.mid || (i >= highlights.low && i <= highlights.high && highlights.found === null)) {
           return "rgba(0, 0, 0, 0.3)";
         }
@@ -125,7 +123,6 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
       })
       .attr("stroke-width", "0.5px");
 
-    // Status message background (for better visibility)
     const messageColor = highlights.found !== null ? "#00ff88" : "#67e8f9";
     svg
       .append("rect")
@@ -139,7 +136,6 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
       .attr("stroke-width", 2)
       .attr("filter", highlights.found !== null ? "drop-shadow(0 2px 8px rgba(0, 255, 136, 0.3))" : "drop-shadow(0 2px 8px rgba(34, 211, 238, 0.3))");
 
-    // Status text (moved to top)
     svg
       .append("text")
       .attr("x", width / 2)
@@ -155,7 +151,7 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
   const handleVisualize = () => {
     let parsed = input
       .split(",")
-      .map((num) => Number(num.trim())) // 👈 ensures "078" -> 78
+      .map((num) => Number(num.trim()))
       .filter((n) => !isNaN(n));
 
     if (parsed.length < 2) {
@@ -163,7 +159,6 @@ export default function BinarySearchViz({ showNavbar = true, showNavigator = tru
       return;
     }
 
-    // Sort ascending & remove duplicates
     parsed = [...new Set(parsed)].sort((a, b) => a - b);
 
     setArray(parsed);

@@ -5,12 +5,11 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// Register
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   try {
     console.log("Registration attempt:", { username, email });
-    
+
     if (!username || !email || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
@@ -24,8 +23,7 @@ router.post("/register", async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     const newUser = await User.create({ username, email, password: hashed });
     console.log("User created successfully:", newUser.id, newUser.email);
-    
-    // Return user without password
+
     const userData = {
       id: newUser.id,
       username: newUser.username,
@@ -33,7 +31,7 @@ router.post("/register", async (req, res) => {
       streak: newUser.streak,
       totalEngagement: newUser.totalEngagement,
     };
-    
+
     res.status(201).json({ message: "User registered successfully", user: userData });
   } catch (err) {
     console.error("Registration error:", err);
@@ -41,21 +39,20 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     console.log("Login attempt for email:", email);
-    
+
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
     const user = await User.findOne({ where: { email } });
     console.log("User lookup result:", user ? `Found user ID: ${user.id}` : "User not found");
-    
+
     if (!user) {
-      // Check if any users exist at all
+
       const userCount = await User.count();
       console.log("Total users in database:", userCount);
       return res.status(404).json({ error: "User not found" });
@@ -69,8 +66,7 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "2h" });
     console.log("Login successful for user:", user.id);
-    
-    // Return user without password
+
     const userData = {
       id: user.id,
       username: user.username,
@@ -78,7 +74,7 @@ router.post("/login", async (req, res) => {
       streak: user.streak,
       totalEngagement: user.totalEngagement,
     };
-    
+
     res.json({ message: "Login successful", token, user: userData });
   } catch (err) {
     console.error("Login error:", err);

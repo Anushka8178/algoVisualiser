@@ -18,7 +18,7 @@ export default function Dashboard(){
         const response = await fetch(`${API_URL}/algorithms`);
         if (response.ok) {
           const data = await response.json();
-          // Map database fields to frontend format
+
           const mapped = data.map(algo => ({
             id: algo.slug,
             title: algo.title,
@@ -91,5 +91,4 @@ export default function Dashboard(){
     </div>
   );
 }
-
 

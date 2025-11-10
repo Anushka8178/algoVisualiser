@@ -7,7 +7,7 @@ import noteRoutes from "./routes/noteRoutes.js";
 import algorithmRoutes from "./routes/algorithmRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
-// Import models to ensure they're registered before sync
+
 import "./models/User.js";
 import Algorithm from "./models/Algorithm.js";
 import "./models/Note.js";
@@ -26,8 +26,7 @@ app.use("/api/progress", progressRoutes);
 
 sequelize.sync({ alter: true }).then(async () => {
   console.log("Database connected ✅");
-  
-  // Seed initial algorithms if table is empty
+
   const count = await Algorithm.count();
   if (count === 0) {
     await Algorithm.bulkCreate([
@@ -42,7 +41,7 @@ sequelize.sync({ alter: true }).then(async () => {
     ]);
     console.log("Algorithms seeded ✅");
   } else {
-    // Check if insertion sort exists, if not add it
+
     const insertionSort = await Algorithm.findOne({ where: { slug: "insertion-sort" } });
     if (!insertionSort) {
       await Algorithm.create({
@@ -55,6 +54,6 @@ sequelize.sync({ alter: true }).then(async () => {
       console.log("Insertion Sort added to database ✅");
     }
   }
-  
+
   app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
 });

@@ -4,10 +4,10 @@ export function mergeSortSteps(arr) {
   const n = array.length;
 
   function merge(left, mid, right) {
-    // Create temporary arrays
+
     const leftArr = [];
     const rightArr = [];
-    
+
     for (let i = left; i <= mid; i++) {
       leftArr.push(array[i]);
     }
@@ -26,10 +26,10 @@ export function mergeSortSteps(arr) {
     let i = 0, j = 0, k = left;
 
     while (i < leftArr.length && j < rightArr.length) {
-      // Compare elements from left and right subarrays
+
       const leftIdx = left + i;
       const rightIdx = mid + 1 + j;
-      
+
       actions.push({
         type: "compare",
         indices: [leftIdx, rightIdx],
@@ -60,7 +60,6 @@ export function mergeSortSteps(arr) {
       k++;
     }
 
-    // Copy remaining elements from leftArr
     while (i < leftArr.length) {
       array[k] = leftArr[i];
       actions.push({
@@ -74,7 +73,6 @@ export function mergeSortSteps(arr) {
       k++;
     }
 
-    // Copy remaining elements from rightArr
     while (j < rightArr.length) {
       array[k] = rightArr[j];
       actions.push({
@@ -124,7 +122,6 @@ export function mergeSortSteps(arr) {
     mergeSort(0, array.length - 1);
   }
 
-  // Mark all as sorted at the end
   actions.push({
     type: "done",
     array: [...array],

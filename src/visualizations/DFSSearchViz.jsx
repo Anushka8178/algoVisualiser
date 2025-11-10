@@ -14,7 +14,6 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
   const [creatingLink, setCreatingLink] = useState(null);
   const [undoStack, setUndoStack] = useState([]);
 
-  // Build adjacency list
   const graph = useMemo(() => {
     const g = {};
     nodes.forEach((n) => (g[n.id] = []));
@@ -30,16 +29,15 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
   const { index, playing, play, pause, reset, stepForward, stepBackward, speed, setSpeed } =
     usePlayer(actions, 900);
 
-  // Draw Graph
   useEffect(() => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
     const width = 800, height = 500;
 
-    const colorVisited = "#10b981"; // emerald green
-    const colorExploring = "#f59e0b"; // amber orange
-    const colorStart = "#eab308"; // yellow
-    const colorBacktrack = "#ef4444"; // red
+    const colorVisited = "#10b981";
+    const colorExploring = "#f59e0b";
+    const colorStart = "#eab308";
+    const colorBacktrack = "#ef4444";
 
     let highlights = { current: null, visited: new Set(), exploring: null, backtrack: null };
     let message = "";
@@ -67,11 +65,10 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       }
     }
 
-    // Draw edges (using merge to update on drag)
     const edges = svg
       .selectAll("line")
       .data(links);
-    
+
     edges.enter()
       .append("line")
       .merge(edges)
@@ -83,10 +80,9 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       .attr("stroke-width", 2)
       .attr("opacity", 0.7)
       .attr("marker-end", "url(#arrow)");
-    
+
     edges.exit().remove();
 
-    // Arrowhead
     svg
       .append("defs")
       .append("marker")
@@ -101,72 +97,58 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       .attr("d", "M0,-5L10,0L0,5")
       .attr("fill", "#94a3b8");
 
-    // Drag behavior - track if actual drag occurred
-    let startX, startY;
     const drag = d3.drag()
+      .clickDistance(8)
       .on("start", function(event, d) {
-        startX = event.x;
-        startY = event.y;
         dragStartedRef.current = false;
         d3.select(this).raise().attr("stroke-width", 3.5);
       })
       .on("drag", function(event, d) {
-        // Only consider it a drag if moved more than 3 pixels
-        const dx = event.x - startX;
-        const dy = event.y - startY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance > 3) {
-          dragStartedRef.current = true;
-        }
-        
-        if (dragStartedRef.current) {
-          d.x = event.x;
-          d.y = event.y;
-          d3.select(this)
-            .attr("cx", d.x)
-            .attr("cy", d.y);
-          
-          // Update label
-          svg.selectAll("text.node-label")
-            .filter((label) => label.id === d.id)
-            .attr("x", d.x)
-            .attr("y", d.y + 6);
-          
-          // Update links
-          svg.selectAll("line")
-            .attr("x1", (l) => l.source.x)
-            .attr("y1", (l) => l.source.y)
-            .attr("x2", (l) => l.target.x)
-            .attr("y2", (l) => l.target.y);
-        }
+        dragStartedRef.current = true;
+        d.x = event.x;
+        d.y = event.y;
+        d3.select(this)
+          .attr("cx", d.x)
+          .attr("cy", d.y);
+
+        svg.selectAll("text.node-label")
+          .filter((label) => label.id === d.id)
+          .attr("x", d.x)
+          .attr("y", d.y + 6);
+
+        svg.selectAll("line")
+          .attr("x1", (l) => l.source.x)
+          .attr("y1", (l) => l.source.y)
+          .attr("x2", (l) => l.target.x)
+          .attr("y2", (l) => l.target.y);
       })
       .on("end", function(event, d) {
         d3.select(this).attr("stroke-width", 2.5);
-        // Only update node position if there was actual dragging
+        
         if (dragStartedRef.current) {
           setNodes((prev) => prev.map((n) => (n.id === d.id ? { ...n, x: d.x, y: d.y } : n)));
+          dragStartedRef.current = false;
         } else {
-          // If no drag occurred, treat it as a click
-          if (creatingLink && creatingLink.id !== d.id) {
-            const newLink = { source: creatingLink, target: d };
-            setUndoStack((prev) => [...prev, { type: "addLink", link: newLink }]);
-            setLinks((prev) => [...prev, newLink]);
-            setCreatingLink(null);
-          } else if (!startNode) {
-            setStartNode(d);
-          } else {
-            setCreatingLink(d);
-          }
+          const nodeData = d;
+          setTimeout(() => {
+            if (creatingLink && creatingLink.id !== nodeData.id) {
+              const newLink = { source: creatingLink, target: nodeData };
+              setUndoStack((prev) => [...prev, { type: "addLink", link: newLink }]);
+              setLinks((prev) => [...prev, newLink]);
+              setCreatingLink(null);
+            } else if (!startNode) {
+              setStartNode(nodeData);
+            } else {
+              setCreatingLink(nodeData);
+            }
+          }, 10);
         }
-        dragStartedRef.current = false;
       });
 
-    // Draw nodes (using merge to update on re-render)
     const circles = svg
       .selectAll("circle")
       .data(nodes);
-    
+
     circles.enter()
       .append("circle")
       .merge(circles)
@@ -184,10 +166,9 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       .attr("stroke-width", 2.5)
       .style("cursor", "move")
       .call(drag)
-    
+
     circles.exit().remove();
 
-    // ✅ Force the start node to stay yellow AFTER circles are drawn
     if (startNode) {
       svg
         .selectAll("circle")
@@ -195,11 +176,10 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
         .attr("fill", colorStart);
     }
 
-    // Labels (with better contrast, using merge to update on drag)
     const labels = svg
       .selectAll("text.node-label")
       .data(nodes, (d) => d.id);
-    
+
     labels.enter()
       .append("text")
       .attr("class", "node-label")
@@ -209,7 +189,7 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       .attr("y", (d) => d.y + 6)
       .attr("text-anchor", "middle")
       .attr("fill", (d) => {
-        // Use white text for colored nodes, dark for default nodes
+
         if (d.id === highlights.backtrack || d.id === highlights.exploring || highlights.visited.has(d.id) || startNode?.id === d.id) {
           return "#ffffff";
         }
@@ -219,7 +199,7 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       .attr("font-weight", "bold")
       .attr("font-family", "system-ui, -apple-system, sans-serif")
       .attr("stroke", (d) => {
-        // Add stroke for better visibility on colored nodes
+
         if (d.id === highlights.backtrack || d.id === highlights.exploring || highlights.visited.has(d.id) || startNode?.id === d.id) {
           return "rgba(0, 0, 0, 0.4)";
         }
@@ -227,10 +207,9 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       })
       .attr("stroke-width", "0.5px")
       .style("pointer-events", "none");
-    
+
     labels.exit().remove();
 
-    // Message background
     svg
       .append("rect")
       .attr("x", width / 2 - 220)
@@ -243,7 +222,6 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       .attr("stroke-width", 2)
       .attr("filter", "drop-shadow(0 2px 8px rgba(34, 211, 238, 0.3))");
 
-    // Message (moved to top for consistency)
     svg
       .append("text")
       .attr("x", width / 2)
@@ -256,7 +234,6 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       .text(message);
   }, [nodes, links, index, startNode, creatingLink, actions]);
 
-  // Create node on click
   useEffect(() => {
     const svg = d3.select(svgRef.current);
     svg.on("click", function (event) {
@@ -268,7 +245,6 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
     });
   }, [nodes]);
 
-  // Undo
   const handleUndo = () => {
     const last = undoStack.pop();
     if (!last) return;
@@ -300,23 +276,33 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
         )}
 
       <div className="flex flex-wrap justify-center gap-3 mb-4">
-        <button 
+        <button
           className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all"
           onClick={() => (playing ? pause() : play())}
         >
           {playing ? "Pause" : "Play"}
         </button>
-        <button 
+        <button
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
           onClick={stepBackward}
         >
           ◀
         </button>
-        <button 
+        <button
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
           onClick={stepForward}
         >
           ▶
+        </button>
+        <button
+          className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all"
+          onClick={() => {
+            reset();
+            setTimeout(() => play(), 100);
+          }}
+          disabled={actions.length === 0}
+        >
+          Replay
         </button>
         <button
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
@@ -330,7 +316,7 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
         >
           Reset
         </button>
-        <button 
+        <button
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
           onClick={handleUndo}
         >

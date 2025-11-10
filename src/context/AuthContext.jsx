@@ -22,7 +22,6 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem('av_user');
   }, [user]);
 
-
   const login = async ({ email, password }) => {
     setLoading(true);
     try {
@@ -40,16 +39,15 @@ export function AuthProvider({ children }) {
 
       if (response.ok && data.token) {
         setToken(data.token);
-        setUser({ 
+        setUser({
           id: data.user.id,
-          email: data.user.email, 
+          email: data.user.email,
           username: data.user.username,
-          name: data.user.username 
+          name: data.user.username
         });
-        
-        // Fetch user stats and progress
+
         await fetchUserStats(data.token);
-        
+
         return { success: true };
       } else {
         return { success: false, message: data.error || 'Login failed' };
@@ -99,26 +97,25 @@ export function AuthProvider({ children }) {
 
   const fetchUserStats = async (authToken) => {
     if (!authToken) return;
-    
+
     try {
       const response = await fetch('http://localhost:5000/api/progress/stats', {
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user stats:', data.stats);
         setUserStats(data.stats);
-        
-        // Fetch completed algorithms
+
         const historyResponse = await fetch('http://localhost:5000/api/progress/history', {
           headers: {
             'Authorization': `Bearer ${authToken}`,
           },
         });
-        
+
         if (historyResponse.ok) {
           const history = await historyResponse.json();
           const completed = history
@@ -147,7 +144,7 @@ export function AuthProvider({ children }) {
     if (hasCompleted(slug)) return;
 
     try {
-      // First, get the algorithm ID from slug
+
       const algoResponse = await fetch(`http://localhost:5000/api/algorithms/${slug}`);
       if (!algoResponse.ok) {
         console.error('Algorithm not found');
@@ -155,7 +152,6 @@ export function AuthProvider({ children }) {
       }
       const algorithm = await algoResponse.json();
 
-      // Track completion in backend
       const response = await fetch('http://localhost:5000/api/progress/complete', {
         method: 'POST',
         headers: {
@@ -171,8 +167,7 @@ export function AuthProvider({ children }) {
       if (response.ok) {
         const data = await response.json();
         setCompletedAlgorithms(prev => [...prev, slug]);
-        
-        // Refresh stats to get updated streak and engagement
+
         await fetchUserStats(token);
       }
     } catch (error) {
@@ -180,25 +175,24 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Fetch stats when token changes or when user is available
   useEffect(() => {
     if (token) {
       fetchUserStats(token);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [token, user?.id]);
 
-  const value = useMemo(() => ({ 
-    token, 
-    user, 
-    loading, 
-    login, 
-    logout, 
-    register, 
-    isAuthenticated: Boolean(token), 
+  const value = useMemo(() => ({
+    token,
+    user,
+    loading,
+    login,
+    logout,
+    register,
+    isAuthenticated: Boolean(token),
     userStats,
-    hasCompleted, 
-    completeAlgorithm 
+    hasCompleted,
+    completeAlgorithm
   }), [token, user, loading, userStats, completedAlgorithms]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -209,5 +203,4 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
-
 

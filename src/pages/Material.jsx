@@ -22,7 +22,7 @@ const content = {
   },
   'dfs': {
     title: 'Depth-First Search',
-    body: 'DFS explores as far as possible along each branch before backtracking. It uses a stack (explicit or recursion).' 
+    body: 'DFS explores as far as possible along each branch before backtracking. It uses a stack (explicit or recursion).'
   },
   'dijkstra': {
     title: "Dijkstra's Algorithm",
@@ -42,11 +42,9 @@ export default function Material(){
   const { id } = useParams();
   const { hasCompleted, completeAlgorithm } = useAuth();
   const navigate = useNavigate();
-  
-  // Get content for the algorithm
+
   const info = content[id] || { title: id, body: 'Learn the core idea, steps, and complexity before visualizing.' };
-  
-  // Debug logging
+
   console.log('Material page - ID:', id, 'Content found:', !!content[id], 'Title:', info.title);
 
   const onDone = () => {
@@ -60,8 +58,8 @@ export default function Material(){
       <div className="max-w-4xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-extrabold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">{info.title} — Material</h1>
-          <Link 
-            to={`/notes/${id}`} 
+          <Link
+            to={`/notes/${id}`}
             className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-4 py-2 rounded-full hover:from-cyan-600 hover:to-teal-600 transition-all shadow-lg hover:shadow-cyan-500/50"
           >
             <span>📝</span>
@@ -91,5 +89,4 @@ export default function Material(){
     </div>
   );
 }
-
 

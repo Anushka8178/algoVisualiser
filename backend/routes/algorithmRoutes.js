@@ -3,7 +3,6 @@ import Algorithm from "../models/Algorithm.js";
 
 const router = express.Router();
 
-// Get all algorithms
 router.get("/", async (req, res) => {
   try {
     const algorithms = await Algorithm.findAll({
@@ -16,7 +15,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get algorithm by slug
 router.get("/:slug", async (req, res) => {
   try {
     const algorithm = await Algorithm.findOne({

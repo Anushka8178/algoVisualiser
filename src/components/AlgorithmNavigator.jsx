@@ -29,7 +29,6 @@ export default function AlgorithmNavigator({ currentSlug }) {
 
   if (loading) return null;
 
-  // Find current algorithm index
   const currentIndex = algorithms.findIndex(algo => algo.slug === currentSlug);
   const currentAlgo = algorithms[currentIndex];
   const nextAlgo = algorithms[currentIndex + 1];
@@ -37,10 +36,10 @@ export default function AlgorithmNavigator({ currentSlug }) {
 
   return (
     <div className="w-full mb-6 relative">
-      {/* Navigation Bar */}
+      {}
       <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-4 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          {/* Back to Dashboard */}
+          {}
           <Link
             to="/dashboard"
             className="flex items-center gap-2 text-cyan-300/90 hover:text-cyan-200 transition-colors px-4 py-2 rounded-lg hover:bg-slate-700/50"
@@ -49,7 +48,7 @@ export default function AlgorithmNavigator({ currentSlug }) {
             <span>Dashboard</span>
           </Link>
 
-          {/* Previous/Next Navigation */}
+          {}
           <div className="flex items-center gap-2">
             {prevAlgo && (
               <Link
@@ -71,7 +70,7 @@ export default function AlgorithmNavigator({ currentSlug }) {
             )}
           </div>
 
-          {/* Notes Button */}
+          {}
           {currentAlgo && (
             <Link
               to={`/notes/${currentSlug}`}
@@ -84,7 +83,7 @@ export default function AlgorithmNavigator({ currentSlug }) {
 
         </div>
 
-        {/* Current Algorithm Info */}
+        {}
         {currentAlgo && (
           <div className="mt-4 pt-4 border-t border-cyan-500/20">
             <div className="flex items-center justify-between text-sm">

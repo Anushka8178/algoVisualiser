@@ -18,28 +18,27 @@ export default function Profile(){
       }
 
       try {
-        // Fetch stats
+
         const statsResponse = await fetch(`${API_URL}/progress/stats`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
-        
+
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           setStats(statsData.stats);
         }
 
-        // Fetch history
         const historyResponse = await fetch(`${API_URL}/progress/history`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
-        
+
         if (historyResponse.ok) {
           const historyData = await historyResponse.json();
-          setHistory(historyData.slice(0, 10)); // Last 10 activities
+          setHistory(historyData.slice(0, 10));
         }
       } catch (error) {
         console.error('Error fetching profile data:', error);
@@ -127,5 +126,4 @@ export default function Profile(){
     </div>
   );
 }
-
 

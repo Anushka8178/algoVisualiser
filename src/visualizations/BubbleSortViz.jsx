@@ -41,7 +41,6 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
     let message = "";
     let isDone = false;
 
-    // ✅ persist sorted indices
     const sortedSet = new Set();
 
     for (let i = 0; i <= index && i < actions.length; i++) {
@@ -70,7 +69,6 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
 
     highlights.sorted = Array.from(sortedSet);
 
-    // Bars
     svg
       .selectAll("rect")
       .data(arr)
@@ -82,14 +80,13 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
       .attr("height", (d) => scaleY(d))
       .attr("rx", 6)
       .attr("fill", (_, i) => {
-        if (isDone) return "#10b981"; // emerald green when done
-        if (highlights.sorted?.includes(i)) return "#10b981"; // emerald green
-        if (highlights.swap?.includes(i)) return "#ef4444"; // red
-        if (highlights.compare?.includes(i)) return "#f59e0b"; // amber orange
-        return "#94a3b8"; // slate-400 for default bars
+        if (isDone) return "#10b981";
+        if (highlights.sorted?.includes(i)) return "#10b981";
+        if (highlights.swap?.includes(i)) return "#ef4444";
+        if (highlights.compare?.includes(i)) return "#f59e0b";
+        return "#94a3b8";
       });
 
-    // Numbers inside bars (with better contrast)
     svg
       .selectAll("text")
       .data(arr)
@@ -99,7 +96,7 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
       .attr("x", (_, i) => i * barWidth + barWidth / 2)
       .attr("y", (d) => height - scaleY(d) - 10)
       .attr("fill", (_, i) => {
-        // Use white text for colored bars, dark for default bars
+
         if (isDone || highlights.sorted?.includes(i) || highlights.swap?.includes(i) || highlights.compare?.includes(i)) {
           return "#ffffff";
         }
@@ -109,7 +106,7 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
       .attr("font-weight", "bold")
       .attr("text-anchor", "middle")
       .attr("stroke", (_, i) => {
-        // Add stroke for better visibility on colored bars
+
         if (isDone || highlights.sorted?.includes(i) || highlights.swap?.includes(i) || highlights.compare?.includes(i)) {
           return "rgba(0, 0, 0, 0.3)";
         }
@@ -117,7 +114,6 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
       })
       .attr("stroke-width", "0.5px");
 
-    // Status message background (for better visibility)
     svg
       .append("rect")
       .attr("x", width / 2 - 220)
@@ -130,7 +126,6 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
       .attr("stroke-width", 2)
       .attr("filter", "drop-shadow(0 2px 8px rgba(34, 211, 238, 0.3))");
 
-    // Status text (moved to top)
     svg
       .append("text")
       .attr("x", width / 2)
@@ -143,7 +138,6 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
       .text(message);
   }, [index, array, actions]);
 
-  // Input handling
   const handleVisualize = () => {
     try {
       const parsed = input
@@ -161,7 +155,6 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
     }
   };
 
-  // Random array generation
   const generateRandomArray = () => {
     const randomArr = Array.from({ length: 8 }, () => Math.floor(Math.random() * 80) + 10);
     setInput(randomArr.join(", "));
@@ -180,7 +173,7 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
           </h1>
         )}
 
-      {/* Input Section */}
+      {}
       <div className="mb-6 w-full max-w-2xl mx-auto text-center">
         <input
           type="text"
@@ -203,7 +196,7 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
         </button>
       </div>
 
-      {/* Controls */}
+      {}
       {array.length > 0 && (
         <>
           <div className="flex flex-wrap justify-center gap-3 mb-4">
@@ -213,19 +206,19 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
             >
               {playing ? "Pause" : "Play"}
             </button>
-            <button 
+            <button
               className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
               onClick={stepBackward}
             >
               ◀
             </button>
-            <button 
+            <button
               className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
               onClick={stepForward}
             >
               ▶
             </button>
-            <button 
+            <button
               className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
               onClick={reset}
             >
@@ -244,7 +237,7 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
             </div>
           </div>
 
-          {/* Visualization Canvas */}
+          {}
           <svg
             ref={svgRef}
             width="800"
@@ -252,7 +245,7 @@ export default function BubbleSortViz({ showNavbar = true, showNavigator = true 
             className="mt-4 rounded-xl shadow-xl bg-slate-800/40 backdrop-blur-md border border-cyan-500/20 mx-auto block"
           ></svg>
 
-          {/* Info */}
+          {}
           <div className="mt-6 w-full max-w-4xl mx-auto">
             <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">

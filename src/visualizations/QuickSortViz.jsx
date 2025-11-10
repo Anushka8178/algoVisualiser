@@ -64,7 +64,7 @@ export default function QuickSortViz({ showNavbar = true, showNavigator = true }
       }
       if (a.type === "done") {
         message = "🎉 Sorting completed!";
-        highlights.sorted = arr.map((_, i) => i); // ✅ make all bars green
+        highlights.sorted = arr.map((_, i) => i);
       }
     }
 
@@ -79,11 +79,11 @@ export default function QuickSortViz({ showNavbar = true, showNavigator = true }
       .attr("height", (d) => scaleY(d))
       .attr("rx", 6)
       .attr("fill", (_, i) => {
-        if (highlights.sorted?.includes(i)) return "#10b981"; // emerald green
-        if (i === highlights.pivot) return "#3b82f6"; // blue
-        if (highlights.swap?.includes(i)) return "#ef4444"; // red
-        if (highlights.compare?.includes(i)) return "#f59e0b"; // amber orange
-        return "#94a3b8"; // slate-400 for default bars
+        if (highlights.sorted?.includes(i)) return "#10b981";
+        if (i === highlights.pivot) return "#3b82f6";
+        if (highlights.swap?.includes(i)) return "#ef4444";
+        if (highlights.compare?.includes(i)) return "#f59e0b";
+        return "#94a3b8";
       });
 
     svg
@@ -95,7 +95,7 @@ export default function QuickSortViz({ showNavbar = true, showNavigator = true }
       .attr("x", (_, i) => i * barWidth + barWidth / 2)
       .attr("y", (d) => height - scaleY(d) - 10)
       .attr("fill", (_, i) => {
-        // Use white text for colored bars, dark for default bars
+
         if (highlights.sorted?.includes(i) || i === highlights.pivot || highlights.swap?.includes(i) || highlights.compare?.includes(i)) {
           return "#ffffff";
         }
@@ -105,7 +105,7 @@ export default function QuickSortViz({ showNavbar = true, showNavigator = true }
       .attr("font-weight", "bold")
       .attr("text-anchor", "middle")
       .attr("stroke", (_, i) => {
-        // Add stroke for better visibility on colored bars
+
         if (highlights.sorted?.includes(i) || i === highlights.pivot || highlights.swap?.includes(i) || highlights.compare?.includes(i)) {
           return "rgba(0, 0, 0, 0.3)";
         }
@@ -113,7 +113,6 @@ export default function QuickSortViz({ showNavbar = true, showNavigator = true }
       })
       .attr("stroke-width", "0.5px");
 
-    // Status message background (for better visibility)
     svg
       .append("rect")
       .attr("x", width / 2 - 220)
@@ -126,7 +125,6 @@ export default function QuickSortViz({ showNavbar = true, showNavigator = true }
       .attr("stroke-width", 2)
       .attr("filter", "drop-shadow(0 2px 8px rgba(34, 211, 238, 0.3))");
 
-    // Status text (moved to top)
     svg
       .append("text")
       .attr("x", width / 2)

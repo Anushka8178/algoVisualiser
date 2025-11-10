@@ -3,7 +3,6 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// Get leaderboard sorted by streak and engagement
 router.get("/", async (req, res) => {
   try {
     const users = await User.findAll({
@@ -12,10 +11,9 @@ router.get("/", async (req, res) => {
         ["streak", "DESC"],
         ["totalEngagement", "DESC"],
       ],
-      limit: 100, // Top 100 users
+      limit: 100,
     });
 
-    // Add rank to each user
     const leaderboard = users.map((user, index) => ({
       rank: index + 1,
       id: user.id,

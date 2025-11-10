@@ -14,17 +14,15 @@ export function usePlayer(actions = [], initialSpeed = 300) {
       setPlaying(false);
       return;
     }
-  
-    // 🧠 Flip speed: higher slider value = faster animation
-    const adjustedSpeed = Math.max(50, 1050 - speed); // tweak 1050 if you want more range
-  
+
+    const adjustedSpeed = Math.max(50, 1050 - speed);
+
     const t = setTimeout(() => {
       setIndex((i) => Math.min(i + 1, actionsRef.current.length - 1));
     }, adjustedSpeed);
-  
+
     return () => clearTimeout(t);
   }, [playing, index, speed]);
-  
 
   const play = () => setPlaying(true);
   const pause = () => setPlaying(false);

@@ -7,17 +7,17 @@ export default function LandingPage() {
   const { isAuthenticated } = useAuth();
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center p-6 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)', color: '#e0f7ff', fontFamily: "'Poppins', sans-serif" }}>
-      {/* Animated background shapes - cyan/teal floating blobs */}
+      {}
       <motion.div
         className="absolute top-20 left-10 w-40 h-40 rounded-full opacity-20 blur-3xl"
         style={{ background: '#00ffff' }}
-        animate={{ 
-          y: [0, 30, 0], 
+        animate={{
+          y: [0, 30, 0],
           x: [0, 20, 0],
-          scale: [1, 1.1, 1] 
+          scale: [1, 1.1, 1]
         }}
-        transition={{ 
-          duration: 8, 
+        transition={{
+          duration: 8,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -25,13 +25,13 @@ export default function LandingPage() {
       <motion.div
         className="absolute bottom-20 right-10 w-60 h-60 rounded-full opacity-20 blur-3xl"
         style={{ background: '#00ffff' }}
-        animate={{ 
-          y: [0, -40, 0], 
+        animate={{
+          y: [0, -40, 0],
           x: [0, -15, 0],
-          scale: [1, 1.15, 1] 
+          scale: [1, 1.15, 1]
         }}
-        transition={{ 
-          duration: 10, 
+        transition={{
+          duration: 10,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -39,19 +39,19 @@ export default function LandingPage() {
       <motion.div
         className="absolute top-1/2 left-1/4 w-32 h-32 rounded-full opacity-15 blur-3xl"
         style={{ background: '#00ffff' }}
-        animate={{ 
-          y: [0, -25, 0], 
+        animate={{
+          y: [0, -25, 0],
           x: [0, 30, 0],
-          scale: [1, 1.2, 1] 
+          scale: [1, 1.2, 1]
         }}
-        transition={{ 
-          duration: 12, 
+        transition={{
+          duration: 12,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
 
-      {/* Title - animated from top */}
+      {}
       <motion.h1
         className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 drop-shadow-2xl"
         style={{ color: '#e0f7ff', textShadow: '0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.3)' }}
@@ -62,7 +62,7 @@ export default function LandingPage() {
         Algorithm Visualizer
       </motion.h1>
 
-      {/* Tagline - animated from bottom */}
+      {}
       <motion.p
         className="text-lg sm:text-xl md:text-2xl max-w-2xl mb-12 font-medium"
         style={{ color: '#e0f7ff', opacity: 0.95 }}
@@ -73,19 +73,19 @@ export default function LandingPage() {
         Learn algorithms the interactive way — visualize, play, and master step-by-step!
       </motion.p>
 
-      {/* Buttons - scale-up animation with pulsing Get Started */}
+      {}
       <motion.div
         className="flex flex-col sm:flex-row gap-4 items-center justify-center"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
       >
-        {/* Get Started Button - with pulsing animation */}
+        {}
         <Link to={isAuthenticated ? "/dashboard" : "/login"}>
         <motion.button
           className="font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300 relative"
-          style={{ 
-            background: '#e0f7ff', 
+          style={{
+            background: '#e0f7ff',
             color: '#0f2027',
             boxShadow: '0 10px 30px rgba(0, 255, 255, 0.3)'
           }}
@@ -110,12 +110,12 @@ export default function LandingPage() {
         </motion.button>
         </Link>
 
-        {/* Login Button */}
+        {}
         <Link to="/login">
           <motion.button
             className="font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
-            style={{ 
-              background: 'transparent', 
+            style={{
+              background: 'transparent',
               border: '2px solid rgba(255, 255, 255, 0.3)',
               color: '#e0f7ff'
             }}
@@ -126,12 +126,12 @@ export default function LandingPage() {
           </motion.button>
         </Link>
 
-        {/* About Button */}
+        {}
         <Link to="/about">
           <motion.button
             className="font-semibold px-8 py-4 rounded-xl text-lg transition-all duration-300"
-            style={{ 
-              background: 'transparent', 
+            style={{
+              background: 'transparent',
               border: '2px solid rgba(255, 255, 255, 0.3)',
               color: '#e0f7ff'
             }}
@@ -143,13 +143,13 @@ export default function LandingPage() {
         </Link>
       </motion.div>
 
-      {/* Footer - subtle animation */}
+      {}
       <motion.footer
         className="absolute bottom-10 text-sm"
         style={{ color: '#e0f7ff', opacity: 0.7 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: [0.5, 0.8, 0.5] }}
-        transition={{ 
+        transition={{
           opacity: {
             duration: 3,
             repeat: Infinity,

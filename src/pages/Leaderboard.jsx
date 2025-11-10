@@ -76,4 +76,3 @@ function medal(rank){
   return '';
 }
 
-
