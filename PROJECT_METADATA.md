@@ -123,7 +123,7 @@ backend/
 
 ---
 
-## 🗄️ Database Schema
+##  Database Schema
 
 ### Users Table
 - `id` (Primary Key)
@@ -204,7 +204,7 @@ npm run preview    # Preview production build
 
 ---
 
-## 📦 Dependencies
+##  Dependencies
 
 ### Frontend Dependencies
 - `react` ^18.2.0
@@ -252,31 +252,6 @@ npm run preview    # Preview production build
    - Responsive design
    - Smooth animations
    - Modern interface
-
----
-
-## 🔄 Data Flow
-
-1. **User Registration/Login:**
-   - Frontend → POST `/api/auth/register` or `/api/auth/login`
-   - Backend → Validates, creates/authenticates user
-   - Backend → Returns JWT token
-   - Frontend → Stores token in localStorage
-
-2. **Algorithm Visualization:**
-   - User selects algorithm → Frontend loads visualization component
-   - User clicks "Play" → Algorithm steps generated
-   - Steps rendered with D3.js → Visual animation
-
-3. **Progress Tracking:**
-   - User completes algorithm → Frontend → POST `/api/progress/complete`
-   - Backend → Updates streak, engagement, creates progress record
-   - Frontend → Updates UI with new stats
-
-4. **Notes:**
-   - User saves note → Frontend → POST `/api/notes`
-   - Backend → Saves to database
-   - User views algorithm → Frontend → GET `/api/notes/:algorithmId`
 
 ---
 
