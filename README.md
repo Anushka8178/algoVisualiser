@@ -111,7 +111,7 @@ CREATE DATABASE algovisualizer;
    - Username (usually `postgres`)
    - Password
    - Host (`localhost`)
-   - Port (`5432`)
+   - Port (`5000`) use this port 
 
 ###  Step 4: Configure the Backend
 
