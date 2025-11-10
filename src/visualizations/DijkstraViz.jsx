@@ -98,16 +98,16 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("x2", (d) => d.target.x)
       .attr("y2", (d) => d.target.y)
       .attr("stroke", (d) => {
-        if (highlights.relaxing &&
-            highlights.relaxing.from === d.source.id &&
+        if (highlights.relaxing && 
+            highlights.relaxing.from === d.source.id && 
             highlights.relaxing.to === d.target.id) {
           return "#a855f7";
         }
         return "#94a3b8";
       })
       .attr("stroke-width", (d) => {
-        if (highlights.relaxing &&
-            highlights.relaxing.from === d.source.id &&
+        if (highlights.relaxing && 
+            highlights.relaxing.from === d.source.id && 
             highlights.relaxing.to === d.target.id) {
           return 4;
         }
@@ -230,11 +230,11 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       const dist = highlights.distances[d.id];
       return dist !== undefined;
     });
-
+    
     const distanceBg = svg
       .selectAll(".distance-bg")
       .data(nodesWithDistances, d => d.id);
-
+    
     distanceBg.enter()
       .append("rect")
       .attr("class", "distance-bg")
@@ -261,13 +261,13 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("stroke-width", 2.5)
       .attr("opacity", 0.98)
       .style("pointer-events", "none");
-
+    
     distanceBg.exit().remove();
 
     const distanceLabels = svg
       .selectAll(".distance-label")
       .data(nodes, d => d.id);
-
+    
     distanceLabels.enter()
       .append("text")
       .attr("class", "distance-label")
@@ -287,7 +287,7 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       .attr("font-family", "Arial, Helvetica, sans-serif")
       .style("pointer-events", "none")
       .style("user-select", "none");
-
+    
     distanceLabels.exit().remove();
 
     svg
@@ -329,7 +329,7 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
   const handleUndo = () => {
     const last = undoStack[undoStack.length - 1];
     if (!last) return;
-
+    
     if (last.type === "addNode") {
       setNodes((prev) => prev.filter((n) => n.id !== last.node.id));
     } else if (last.type === "addLink") {
@@ -405,19 +405,19 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
       )}
 
       <div className="flex flex-wrap justify-center gap-3 mb-4">
-        <button
+        <button 
           className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all"
           onClick={() => (playing ? pause() : play())}
         >
           {playing ? "Pause" : "Play"}
         </button>
-        <button
+        <button 
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
           onClick={stepBackward}
         >
           ◀
         </button>
-        <button
+        <button 
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
           onClick={stepForward}
         >
@@ -447,7 +447,7 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
         >
           Reset
         </button>
-        <button
+        <button 
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
           onClick={handleUndo}
         >
@@ -483,7 +483,7 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
               </div>
             </div>
             {index >= actions.length - 1 && actions[actions.length - 1]?.type === "done" && (
-              <div className="text-center">
+            <div className="text-center">
                 <div className="text-sm font-semibold mb-1 text-cyan-300/70">Total Distances</div>
                 <div className="text-lg font-mono font-bold text-cyan-400 max-h-20 overflow-y-auto">
                   {Object.entries(actions[actions.length - 1]?.distances || {})
@@ -491,8 +491,8 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
                     .map(([node, dist]) => (
                       <div key={node} className="text-sm">{node}: {dist}</div>
                     ))}
-                </div>
               </div>
+            </div>
             )}
             <div className="text-center">
               <div className="text-sm font-semibold mb-1 text-cyan-300/70">Time Complexity</div>
@@ -514,8 +514,8 @@ export default function DijkstraViz({ showNavbar = true, showNavigator = true })
               🖱 Click to create nodes → Click one node then another to connect (enter weight) → Click a node to set start → Undo anytime.
             </p>
           </div>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

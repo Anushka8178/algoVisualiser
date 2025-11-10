@@ -34,7 +34,21 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (parseError) {
+          console.error('Failed to parse JSON response:', parseError);
+          return { success: false, message: 'Server error. Invalid response format.' };
+        }
+      } else {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        return { success: false, message: text || 'Server error. Please check if the backend is running.' };
+      }
+
       console.log('Login response:', { status: response.status, hasToken: !!data.token, error: data.error });
 
       if (response.ok && data.token) {
@@ -50,11 +64,14 @@ export function AuthProvider({ children }) {
 
         return { success: true };
       } else {
-        return { success: false, message: data.error || 'Login failed' };
+        return { success: false, message: data.error || data.message || 'Login failed' };
       }
     } catch (e) {
       console.error('Login error:', e);
-      return { success: false, message: 'Login failed. Please try again.' };
+      if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+        return { success: false, message: 'Cannot connect to server. Please ensure the backend is running on http://localhost:5000' };
+      }
+      return { success: false, message: e.message || 'Login failed. Please try again.' };
     } finally {
       setLoading(false);
     }

@@ -42,19 +42,19 @@ export default function Register(){
         <form onSubmit={onSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium mb-2 text-cyan-300/70">Name</label>
-            <input value={form.name} onChange={e=>setForm(f=>({ ...f, name:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" placeholder="Your name" />
+            <input value={form.name} onChange={e=>setForm(f=>({ ...f, name:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all duration-200" placeholder="Your name" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-2 text-cyan-300/70">Email</label>
-            <input type="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" placeholder="you@email.com" />
+            <input type="email" value={form.email} onChange={e=>setForm(f=>({ ...f, email:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all duration-200" placeholder="you@email.com" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-2 text-cyan-300/70">Password</label>
-            <input type="password" value={form.password} onChange={e=>setForm(f=>({ ...f, password:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" placeholder="••••••••" />
+            <input type="password" value={form.password} onChange={e=>setForm(f=>({ ...f, password:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all duration-200" placeholder="••••••••" />
           </div>
           <div>
             <label className="block text-sm font-medium mb-2 text-cyan-300/70">Confirm Password</label>
-            <input type="password" value={form.confirm} onChange={e=>setForm(f=>({ ...f, confirm:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all" placeholder="••••••••" />
+            <input type="password" value={form.confirm} onChange={e=>setForm(f=>({ ...f, confirm:e.target.value }))} className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all duration-200" placeholder="••••••••" />
           </div>
           <motion.button disabled={submitting} type="submit" className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 font-semibold px-8 py-4 rounded-xl text-lg shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 disabled:opacity-50" whileHover={{ scale: submitting?1:1.02 }} whileTap={{ scale: submitting?1:0.98 }}>
             {submitting? 'Creating...' : 'Create Account'}

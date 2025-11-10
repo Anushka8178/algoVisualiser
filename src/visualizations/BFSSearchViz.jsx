@@ -265,19 +265,19 @@ export default function BFSInteractivePro({ showNavbar = true, showNavigator = t
         )}
 
       <div className="flex flex-wrap justify-center gap-3 mb-4">
-        <button
+        <button 
           className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-cyan-500/50 transition-all"
           onClick={() => (playing ? pause() : play())}
         >
           {playing ? "Pause" : "Play"}
         </button>
-        <button
+        <button 
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
           onClick={stepBackward}
         >
           ◀
         </button>
-        <button
+        <button 
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
           onClick={stepForward}
         >
@@ -305,7 +305,7 @@ export default function BFSInteractivePro({ showNavbar = true, showNavigator = t
         >
           Reset
         </button>
-        <button
+        <button 
           className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
           onClick={handleUndo}
         >
@@ -360,8 +360,8 @@ export default function BFSInteractivePro({ showNavbar = true, showNavigator = t
               🖱 Click to create nodes → Click one node then another to connect → Click a node to set start → Undo anytime.
             </p>
           </div>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

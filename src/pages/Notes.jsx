@@ -183,23 +183,35 @@ export default function Notes(){
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-6 py-10">
-        <header className="mb-8">
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">Notes</h1>
-          <p className="text-cyan-100/80 mt-2">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
+        <motion.header 
+          className="mb-6 sm:mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">
+            Notes
+          </h1>
+          <p className="text-cyan-100/80 mt-2 text-sm sm:text-base">
             {algorithm ? `Algorithm: ${algorithm.title}` : `Algorithm: ${paramId}`}
           </p>
-        </header>
+        </motion.header>
         {algorithm && (
-          <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-6 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
+          <motion.div 
+            className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-cyan-500/20 shadow-xl shadow-cyan-900/20"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             <textarea
               value={text}
               onChange={e=>setText(e.target.value)}
               rows={5}
               placeholder="Write your note about the algorithm..."
-              className="w-full rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 p-4 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
+              className="w-full rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 p-4 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all duration-200 resize-none text-sm sm:text-base"
             />
-            <div className="mt-4 flex gap-3">
+            <div className="mt-4 flex flex-col sm:flex-row gap-3">
               <motion.button
                 onClick={save}
                 disabled={saving || !text.trim()}
@@ -218,7 +230,7 @@ export default function Notes(){
                 Clear
               </motion.button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         <div className="mt-6 space-y-4">

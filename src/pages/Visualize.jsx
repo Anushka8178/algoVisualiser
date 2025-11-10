@@ -38,42 +38,53 @@ export default function Visualize() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <Navbar />
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <AlgorithmNavigator currentSlug={id} />
-        <header className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">{formatTitle(id)}</h1>
-          <p className="text-lg font-medium text-cyan-100/80">Visualize step-by-step execution</p>
-        </header>
+        <motion.header 
+          className="mb-6 sm:mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
+            {formatTitle(id)}
+          </h1>
+          <p className="text-base sm:text-lg font-medium text-cyan-100/80">Visualize step-by-step execution</p>
+        </motion.header>
 
-        {}
         <motion.div
-          className=""
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className="w-full"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
         >
           {renderViz()}
         </motion.div>
 
-        {}
         {!['bubble-sort', 'insertion-sort', 'heap-sort', 'merge-sort', 'quick-sort', 'binary-search', 'linear-search', 'bfs', 'dfs', 'dijkstra'].includes(id) && (
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
-              <div className="text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Time Complexity</div>
-              <div className="text-2xl font-bold font-mono text-cyan-400">
+          <motion.div 
+            className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all duration-300">
+              <div className="text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Time Complexity</div>
+              <div className="text-xl sm:text-2xl font-bold font-mono text-cyan-400">
                 {getTimeComplexity(id)}
               </div>
             </div>
-            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
-              <div className="text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Space Complexity</div>
-              <div className="text-2xl font-bold font-mono text-cyan-400">
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all duration-300">
+              <div className="text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Space Complexity</div>
+              <div className="text-xl sm:text-2xl font-bold font-mono text-cyan-400">
                 {getSpaceComplexity(id)}
               </div>
             </div>
-            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
-              <div className="text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Algorithm</div>
-              <div className="text-xl font-bold text-white">{formatTitle(id)}</div>
+            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all duration-300">
+              <div className="text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Algorithm</div>
+              <div className="text-lg sm:text-xl font-bold text-white">{formatTitle(id)}</div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
@@ -82,7 +93,7 @@ export default function Visualize() {
 
 function formatTitle(id) {
   if (!id) return '';
-
+  
   const specialCases = {
     'bfs': 'Breadth-First Search',
     'dfs': 'Depth-First Search',
@@ -95,11 +106,11 @@ function formatTitle(id) {
     'binary-search': 'Binary Search',
     'linear-search': 'Linear Search'
   };
-
+  
   if (specialCases[id]) {
     return specialCases[id];
   }
-
+  
   return id
     .split('-')
     .map((s) => s[0].toUpperCase() + s.slice(1))

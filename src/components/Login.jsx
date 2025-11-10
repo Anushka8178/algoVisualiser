@@ -101,7 +101,7 @@ export default function Login() {
               value={form.email}
               onChange={e=>setForm(f=>({ ...f, email:e.target.value }))}
               placeholder="your@email.com"
-              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all duration-200"
             />
           </motion.div>
 
@@ -116,7 +116,7 @@ export default function Login() {
               value={form.password}
               onChange={e=>setForm(f=>({ ...f, password:e.target.value }))}
               placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
+              className="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-cyan-500/30 text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all duration-200"
             />
           </motion.div>
 

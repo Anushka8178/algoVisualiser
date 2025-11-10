@@ -2,3 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  * {
+    @apply transition-colors duration-200;
+  }
+  
+  body {
+    @apply antialiased;
+  }
+  
+  input, textarea, select {
+    @apply focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50;
+  }
+  
+  button {
+    @apply focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+}
+
