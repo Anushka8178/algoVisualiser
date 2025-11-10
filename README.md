@@ -303,8 +303,6 @@ tech:
 | **Pavithra Nair** | AM.SC.U4CSE23141 | Gamification & Testing Lead |
 | **Meghna Binod** | AM.SC.U4CSE23135 | Frontend & Database Administrator |
 
-**Contact:**
-- GitHub: [@Anushka8178](https://github.com/Anushka8178)
 
 ---
 
