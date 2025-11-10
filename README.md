@@ -256,7 +256,7 @@ features:
     - Pathfinding - planned
   visualization:
     engine: D3.js
-    controls: Play, Pause, Step, Speed (0.5x–2x)
+    controls: Play, Pause, Step, Speed (
     metrics: Time & Space Complexity (Big-O)
   gamification:
     streak: daily_learning
@@ -313,8 +313,9 @@ tech:
 - [ ] Additional sorting algorithms
 - [ ] User preferences and settings
 - [ ] Export/import notes
-- [ ] Dark mode
-- [ ] Mobile app (React Native)
+- [ ] Light mode
+- [ ] Mobile app
+- [ ] Email/Notifications to users regarding streak
 
 
 Thank you
