@@ -6,6 +6,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const users = await User.findAll({
+      where: { role: "student" },
       attributes: ["id", "username", "email", "streak", "totalEngagement"],
       order: [
         ["streak", "DESC"],

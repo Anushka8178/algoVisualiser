@@ -53,16 +53,18 @@ export function AuthProvider({ children }) {
 
       if (response.ok && data.token) {
         setToken(data.token);
-        setUser({
+        const newUser = {
           id: data.user.id,
           email: data.user.email,
           username: data.user.username,
-          name: data.user.username
-        });
+          name: data.user.username,
+          role: data.user.role || 'student'
+        };
+        setUser(newUser);
 
         await fetchUserStats(data.token);
 
-        return { success: true };
+        return { success: true, role: newUser.role };
       } else {
         return { success: false, message: data.error || data.message || 'Login failed' };
       }
@@ -77,7 +79,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async ({ name, email, password }) => {
+  const register = async ({ name, email, password, role = 'student' }) => {
     setLoading(true);
     try {
       console.log('Registering user:', { name, email });
@@ -86,7 +88,7 @@ export function AuthProvider({ children }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username: name, email, password }),
+        body: JSON.stringify({ username: name, email, password, role }),
       });
 
       const data = await response.json();
@@ -116,7 +118,7 @@ export function AuthProvider({ children }) {
     if (!authToken) return;
 
     try {
-      const response = await fetch('http://localhost:5000/api/progress/stats', {
+      const response = await fetch('http://localhost:5173/api/progress/stats', {
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },

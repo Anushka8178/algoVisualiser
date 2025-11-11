@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { useToast } from '../components/ToastProvider';
@@ -8,7 +8,10 @@ export default function Register(){
   const { register } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const defaultRole = searchParams.get('role') === 'educator' ? 'educator' : 'student';
   const [form, setForm] = useState({ name:'', email:'', password:'', confirm:'' });
+  const [role, setRole] = useState(defaultRole);
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async (e) => {
@@ -22,7 +25,7 @@ export default function Register(){
       return;
     }
     setSubmitting(true);
-    const res = await register({ name: form.name, email: form.email, password: form.password });
+    const res = await register({ name: form.name, email: form.email, password: form.password, role });
     setSubmitting(false);
     if(res.success){
       showToast('Registration successful. Please login.', 'success');
@@ -39,6 +42,22 @@ export default function Register(){
         initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }}>
         <h1 className="text-4xl font-extrabold mb-2 text-center bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">Create Account</h1>
         <p className="text-cyan-100/80 text-center mb-8">Join and start visualizing algorithms</p>
+        <div className="flex justify-center gap-3 mb-6">
+          <button
+            type="button"
+            onClick={()=>setRole('student')}
+            className={`px-4 py-2 rounded-full border transition ${role==='student' ? 'bg-cyan-500 text-white border-cyan-400 shadow-lg shadow-cyan-500/40' : 'bg-slate-800/60 text-cyan-200 border-cyan-500/30 hover:bg-slate-700/60'}`}
+          >
+            I’m a Student
+          </button>
+          <button
+            type="button"
+            onClick={()=>setRole('educator')}
+            className={`px-4 py-2 rounded-full border transition ${role==='educator' ? 'bg-cyan-500 text-white border-cyan-400 shadow-lg shadow-cyan-500/40' : 'bg-slate-800/60 text-cyan-200 border-cyan-500/30 hover:bg-slate-700/60'}`}
+          >
+            I’m an Educator
+          </button>
+        </div>
         <form onSubmit={onSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium mb-2 text-cyan-300/70">Name</label>

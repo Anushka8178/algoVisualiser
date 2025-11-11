@@ -22,11 +22,15 @@ export default function Login() {
     setSubmitting(false);
     if(res.success){
       showToast('Welcome back!', 'success');
-      navigate('/dashboard');
+      navigate(res.role === 'educator' ? '/educator' : '/dashboard');
     } else {
       showToast(res.message || 'Login failed', 'error');
     }
   };
+  
+  // Optional quick links for role-based sign-in info
+  const goToEducatorSignup = () => navigate('/register?role=educator');
+  const goToStudentSignup = () => navigate('/register?role=student');
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       {}
@@ -144,6 +148,11 @@ export default function Login() {
           <Link to="/register" className="text-cyan-300 hover:text-cyan-200 underline font-medium">
             Sign up
           </Link>
+          <div className="mt-3 flex items-center justify-center gap-3">
+            <button onClick={goToStudentSignup} className="text-cyan-300 hover:text-cyan-200 underline">I’m a Student</button>
+            <span className="text-cyan-100/50">|</span>
+            <button onClick={goToEducatorSignup} className="text-cyan-300 hover:text-cyan-200 underline">I’m an Educator</button>
+          </div>
         </motion.div>
       </motion.div>
     </div>
