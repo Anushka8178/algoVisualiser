@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import * as d3 from "d3";
 import { heapSortSteps } from "../algos/heapSortSteps";
 import { usePlayer } from "../hooks/usePlayer";
+import { useVisualizationState } from "../hooks/useVisualizationState";
 import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
 import AlgorithmNavigator from "../components/AlgorithmNavigator";
@@ -12,6 +13,7 @@ export default function HeapSortViz({ showNavbar = true, showNavigator = true })
   const [input, setInput] = useState("28, 31, 35, 37, 40, 47, 48, 52");
   const [array, setArray] = useState([]);
   const svgRef = useRef(null);
+  const { hasSavedState, savedState, saving, saveState } = useVisualizationState('heap-sort');
 
   const actions = useMemo(() => (array.length ? heapSortSteps(array) : []), [array]);
 
@@ -25,7 +27,37 @@ export default function HeapSortViz({ showNavbar = true, showNavigator = true })
     stepBackward,
     speed,
     setSpeed,
-  } = usePlayer(actions, 300);
+    setIndex,
+  } = usePlayer(actions, savedState?.speed || 300);
+
+  useEffect(() => {
+    if (savedState && !array.length) {
+      setInput(savedState.input || input);
+      if (savedState.array && savedState.array.length > 0) {
+        setArray(savedState.array);
+        if (savedState.index !== undefined) {
+          setTimeout(() => setIndex(savedState.index), 200);
+        }
+      }
+    }
+  }, [savedState]);
+
+  const handleSaveProgress = () => {
+    saveState({ input, array, index, speed });
+  };
+
+  const handleResume = () => {
+    if (savedState) {
+      setInput(savedState.input || input);
+      if (savedState.array && savedState.array.length > 0) {
+        setArray(savedState.array);
+        setTimeout(() => {
+          if (savedState.index !== undefined) setIndex(savedState.index);
+          if (savedState.speed !== undefined) setSpeed(savedState.speed);
+        }, 200);
+      }
+    }
+  };
 
   useEffect(() => {
     if (!array.length || !svgRef.current) return;
@@ -267,6 +299,29 @@ export default function HeapSortViz({ showNavbar = true, showNavigator = true })
               onClick={reset}
             >
               Reset
+            </button>
+            {hasSavedState && (
+              <button
+                className={`border px-4 py-2 rounded-xl transition-all ${
+                  isDark
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600'
+                    : 'bg-gradient-to-r from-blue-400 to-cyan-400 text-white hover:from-blue-500 hover:to-cyan-500'
+                }`}
+                onClick={handleResume}
+              >
+                Resume
+              </button>
+            )}
+            <button
+              className={`border px-4 py-2 rounded-xl transition-all ${
+                isDark
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+                  : 'bg-gradient-to-r from-purple-400 to-pink-400 text-white hover:from-purple-500 hover:to-pink-500'
+              }`}
+              onClick={handleSaveProgress}
+              disabled={saving || !array.length}
+            >
+              {saving ? 'Saving...' : 'Save Progress'}
             </button>
             <div className={`ml-4 flex items-center gap-2 ${
               isDark ? 'text-cyan-100' : 'text-gray-700'

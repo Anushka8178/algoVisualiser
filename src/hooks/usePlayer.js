@@ -30,5 +30,5 @@ export function usePlayer(actions = [], initialSpeed = 300) {
   const stepForward = () => setIndex(i => Math.min(i + 1, actionsRef.current.length - 1));
   const stepBackward = () => setIndex(i => Math.max(0, i - 1));
 
-  return { index, playing, play, pause, reset, stepForward, stepBackward, speed, setSpeed };
+  return { index, playing, play, pause, reset, stepForward, stepBackward, speed, setSpeed, setIndex };
 }

@@ -7,11 +7,13 @@ import noteRoutes from "./routes/noteRoutes.js";
 import algorithmRoutes from "./routes/algorithmRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
+import visualizationStateRoutes from "./routes/visualizationStateRoutes.js";
 
 import "./models/User.js";
 import Algorithm from "./models/Algorithm.js";
 import "./models/Note.js";
 import "./models/UserProgress.js";
+import "./models/VisualizationState.js";
 
 dotenv.config();
 const app = express();
@@ -23,6 +25,7 @@ app.use("/api/algorithms", algorithmRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/progress", progressRoutes);
+app.use("/api/visualization-state", visualizationStateRoutes);
 
 sequelize.sync({ alter: true }).then(async () => {
   console.log("Database connected ✅");
@@ -78,6 +81,20 @@ sequelize.sync({ alter: true }).then(async () => {
         slug: "linear-search"
       });
       console.log("Linear Search added to database ✅");
+    }
+
+    const treeTraversals = await Algorithm.findAll({
+      where: {
+        slug: ['inorder-traversal', 'preorder-traversal', 'postorder-traversal']
+      }
+    });
+    if (treeTraversals.length > 0) {
+      await Algorithm.destroy({
+        where: {
+          slug: ['inorder-traversal', 'preorder-traversal', 'postorder-traversal']
+        }
+      });
+      console.log(`Removed ${treeTraversals.length} tree traversal algorithm(s) from database ✅`);
     }
   }
 

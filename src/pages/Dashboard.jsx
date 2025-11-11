@@ -14,6 +14,8 @@ export default function Dashboard(){
   const [query, setQuery] = useState('');
   const [algorithms, setAlgorithms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [completionFilter, setCompletionFilter] = useState('All');
 
   useEffect(() => {
     const fetchAlgorithms = async () => {
@@ -23,11 +25,6 @@ export default function Dashboard(){
           const data = await response.json();
 
           const mapped = data
-            .filter(algo => 
-              algo.slug !== 'inorder-traversal' && 
-              algo.slug !== 'preorder-traversal' && 
-              algo.slug !== 'postorder-traversal'
-            )
             .map(algo => ({
               id: algo.slug,
               title: algo.title,
@@ -46,10 +43,29 @@ export default function Dashboard(){
     fetchAlgorithms();
   }, []);
 
-  const filtered = useMemo(()=> algorithms.filter(a =>
-    a.title.toLowerCase().includes(query.toLowerCase()) ||
-    a.category.toLowerCase().includes(query.toLowerCase())
-  ), [query, algorithms]);
+  const categories = useMemo(() => {
+    const cats = ['All', ...new Set(algorithms.map(a => a.category))];
+    return cats;
+  }, [algorithms]);
+
+  const filtered = useMemo(()=> {
+    let result = algorithms.filter(a =>
+      a.title.toLowerCase().includes(query.toLowerCase()) ||
+      a.category.toLowerCase().includes(query.toLowerCase())
+    );
+
+    if (selectedCategory !== 'All') {
+      result = result.filter(a => a.category === selectedCategory);
+    }
+
+    if (completionFilter === 'Completed') {
+      result = result.filter(a => hasCompleted(a.id));
+    } else if (completionFilter === 'Not Completed') {
+      result = result.filter(a => !hasCompleted(a.id));
+    }
+
+    return result;
+  }, [query, algorithms, selectedCategory, completionFilter, hasCompleted]);
 
   const SkeletonCard = () => (
     <div className={`backdrop-blur-md rounded-2xl p-6 border shadow-xl animate-pulse ${
@@ -111,7 +127,7 @@ export default function Dashboard(){
             Read the material, then visualize
           </motion.p>
           <motion.div 
-            className="mt-4 sm:mt-6"
+            className="mt-4 sm:mt-6 space-y-4"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -126,6 +142,54 @@ export default function Dashboard(){
                   : 'bg-white/80 border-cyan-200 text-gray-900 placeholder-gray-400'
               }`}
             />
+            
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-sm font-medium ${
+                  isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+                }`}>Category:</span>
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                      selectedCategory === cat
+                        ? isDark
+                          ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-lg shadow-cyan-500/30'
+                          : 'bg-gradient-to-r from-cyan-400 to-teal-400 text-white shadow-lg shadow-cyan-400/30'
+                        : isDark
+                          ? 'bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50'
+                          : 'bg-white/80 border border-cyan-200 text-gray-700 hover:bg-gray-100 hover:border-cyan-300'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`text-sm font-medium ${
+                  isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+                }`}>Status:</span>
+                {['All', 'Completed', 'Not Completed'].map(status => (
+                  <button
+                    key={status}
+                    onClick={() => setCompletionFilter(status)}
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                      completionFilter === status
+                        ? isDark
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+                          : 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg shadow-purple-400/30'
+                        : isDark
+                          ? 'bg-slate-700/50 border border-purple-500/30 text-purple-100 hover:bg-slate-700/70 hover:border-purple-400/50'
+                          : 'bg-white/80 border border-purple-200 text-gray-700 hover:bg-gray-100 hover:border-purple-300'
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
           </motion.div>
         </header>
 

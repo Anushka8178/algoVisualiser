@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import * as d3 from "d3";
 import { bfsSteps } from "../algos/bfsSteps";
 import { usePlayer } from "../hooks/usePlayer";
+import { useVisualizationState } from "../hooks/useVisualizationState";
 import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
 import AlgorithmNavigator from "../components/AlgorithmNavigator";
@@ -16,6 +17,7 @@ export default function BFSInteractivePro({ showNavbar = true, showNavigator = t
   const [startNode, setStartNode] = useState(null);
   const [creatingLink, setCreatingLink] = useState(null);
   const [undoStack, setUndoStack] = useState([]);
+  const { hasSavedState, savedState, saving, saveState } = useVisualizationState('bfs');
 
   const graph = useMemo(() => {
     const g = {};
@@ -29,8 +31,73 @@ export default function BFSInteractivePro({ showNavbar = true, showNavigator = t
     return bfsSteps(graph, startNode.id);
   }, [graph, startNode]);
 
-  const { index, playing, play, pause, reset, stepForward, stepBackward, speed, setSpeed } =
-    usePlayer(actions, 900);
+  const { index, playing, play, pause, reset, stepForward, stepBackward, speed, setSpeed, setIndex } =
+    usePlayer(actions, savedState?.speed || 900);
+
+  useEffect(() => {
+    if (savedState && nodes.length === 0 && !startNode) {
+      if (savedState.nodes && savedState.nodes.length > 0) {
+        setNodes(savedState.nodes);
+        if (savedState.links && savedState.links.length > 0) {
+          const restoredLinks = savedState.links.map(link => ({
+            ...link,
+            source: savedState.nodes.find(n => n.id === link.source.id || n.id === link.source) || link.source,
+            target: savedState.nodes.find(n => n.id === link.target.id || n.id === link.target) || link.target
+          }));
+          setLinks(restoredLinks);
+        }
+        if (savedState.startNode) {
+          const restoredStartNode = savedState.nodes.find(n => n.id === savedState.startNode.id || n.id === savedState.startNode);
+          if (restoredStartNode) {
+            setStartNode(restoredStartNode);
+            if (savedState.index !== undefined) {
+              setTimeout(() => setIndex(savedState.index), 300);
+            }
+          }
+        }
+      }
+    }
+  }, [savedState]);
+
+  const handleSaveProgress = () => {
+    const state = {
+      nodes,
+      links: links.map(link => ({
+        source: { id: link.source.id || link.source },
+        target: { id: link.target.id || link.target }
+      })),
+      startNode: startNode ? { id: startNode.id } : null,
+      index,
+      speed,
+    };
+    saveState(state);
+  };
+
+  const handleResume = () => {
+    if (savedState) {
+      if (savedState.nodes && savedState.nodes.length > 0) {
+        setNodes(savedState.nodes);
+        if (savedState.links && savedState.links.length > 0) {
+          const restoredLinks = savedState.links.map(link => ({
+            ...link,
+            source: savedState.nodes.find(n => n.id === link.source.id || n.id === link.source) || link.source,
+            target: savedState.nodes.find(n => n.id === link.target.id || n.id === link.target) || link.target
+          }));
+          setLinks(restoredLinks);
+        }
+        if (savedState.startNode) {
+          const restoredStartNode = savedState.nodes.find(n => n.id === savedState.startNode.id || n.id === savedState.startNode);
+          if (restoredStartNode) {
+            setStartNode(restoredStartNode);
+            setTimeout(() => {
+              if (savedState.index !== undefined) setIndex(savedState.index);
+              if (savedState.speed !== undefined) setSpeed(savedState.speed);
+            }, 300);
+          }
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
@@ -329,6 +396,29 @@ export default function BFSInteractivePro({ showNavbar = true, showNavigator = t
           }}
         >
           Reset
+        </button>
+        {hasSavedState && (
+          <button
+            className={`border px-4 py-2 rounded-xl transition-all ${
+              isDark
+                ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600'
+                : 'bg-gradient-to-r from-blue-400 to-cyan-400 text-white hover:from-blue-500 hover:to-cyan-500'
+            }`}
+            onClick={handleResume}
+          >
+            Resume
+          </button>
+        )}
+        <button
+          className={`border px-4 py-2 rounded-xl transition-all ${
+            isDark
+              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+              : 'bg-gradient-to-r from-purple-400 to-pink-400 text-white hover:from-purple-500 hover:to-pink-500'
+          }`}
+          onClick={handleSaveProgress}
+          disabled={saving || !startNode || nodes.length === 0}
+        >
+          {saving ? 'Saving...' : 'Save Progress'}
         </button>
         <button 
           className={`border px-4 py-2 rounded-xl transition-all ${

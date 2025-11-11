@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +12,7 @@ const API_URL = 'http://localhost:5000/api';
 export default function Notes(){
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { token } = useAuth();
+  const { token, hasCompleted } = useAuth();
   const { showToast } = useToast();
   const params = useParams();
   const [sp] = useSearchParams();
@@ -203,9 +204,22 @@ export default function Notes(){
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">
-            Notes
-          </h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent drop-shadow-lg">
+              Notes
+            </h1>
+            <Link
+              to={hasCompleted(paramId) ? `/visualize/${paramId}` : `/material/${paramId}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                isDark
+                  ? 'bg-slate-700/50 border-cyan-500/30 hover:bg-slate-700/70 hover:border-cyan-400/50 text-cyan-100'
+                  : 'bg-gray-200 border-gray-300 hover:bg-gray-300 hover:border-gray-400 text-gray-700'
+              }`}
+            >
+              <span>←</span>
+              <span>Back</span>
+            </Link>
+          </div>
           <p className={`mt-2 text-sm sm:text-base ${
             isDark ? 'text-cyan-100/80' : 'text-gray-600'
           }`}>

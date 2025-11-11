@@ -38,17 +38,24 @@ export default function Profile() {
         });
         if (historyResponse.ok) {
           const historyData = await historyResponse.json();
+          console.log('Profile: Fetched history:', historyData.length, 'activities');
+          console.log('Profile: Full history data:', historyData);
+          
+          const viewedActivities = historyData.filter(a => a.activityType === 'viewed');
+          console.log('Profile: Viewed activities:', viewedActivities.length, viewedActivities);
+          
+          const activitiesWithAlgorithms = historyData.filter(a => a.Algorithm);
+          const activitiesWithoutAlgorithms = historyData.filter(a => !a.Algorithm);
+          console.log('Profile: Activities with algorithms:', activitiesWithAlgorithms.length);
+          console.log('Profile: Activities WITHOUT algorithms:', activitiesWithoutAlgorithms.length, activitiesWithoutAlgorithms);
+          
           setHistory(historyData);
         }
 
         const algoResponse = await fetch(`${API_URL}/algorithms`);
         if (algoResponse.ok) {
           const algoData = await algoResponse.json();
-          setAlgorithms(algoData.filter(a => 
-            a.slug !== 'inorder-traversal' && 
-            a.slug !== 'preorder-traversal' && 
-            a.slug !== 'postorder-traversal'
-          ));
+          setAlgorithms(algoData);
         }
 
         const leaderboardResponse = await fetch(`${API_URL}/leaderboard`);
@@ -64,6 +71,20 @@ export default function Profile() {
     };
 
     fetchData();
+    
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchData();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', fetchData);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', fetchData);
+    };
   }, [token]);
 
   const userRank = leaderboard.findIndex(u => u.id === user?.id) + 1 || null;
@@ -84,10 +105,17 @@ export default function Profile() {
   const activityByDay = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (6 - i));
-    const dateStr = date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     const count = history.filter(h => {
-      const activityDate = new Date(h.completedAt).toISOString().split('T')[0];
-      return activityDate === dateStr;
+      const activityDate = new Date(h.completedAt);
+      const actYear = activityDate.getFullYear();
+      const actMonth = String(activityDate.getMonth() + 1).padStart(2, '0');
+      const actDay = String(activityDate.getDate()).padStart(2, '0');
+      const actDateStr = `${actYear}-${actMonth}-${actDay}`;
+      return actDateStr === dateStr;
     }).length;
     return { day: date.toLocaleDateString('en-US', { weekday: 'short' }), count };
   });
@@ -505,13 +533,26 @@ export default function Profile() {
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {history.slice(0, 8).map((activity, idx) => {
                   const algorithm = activity.Algorithm;
-                  if (!algorithm) return null;
+                  if (!algorithm) {
+                    console.warn('Profile: Activity without algorithm (filtered out):', {
+                      id: activity.id,
+                      activityType: activity.activityType,
+                      algorithmId: activity.algorithmId,
+                      completedAt: activity.completedAt
+                    });
+                    return null;
+                  }
+                  
+                  console.log('Profile: Rendering activity:', {
+                    idx,
+                    activityType: activity.activityType,
+                    algorithmTitle: algorithm.title,
+                    algorithmSlug: algorithm.slug
+                  });
                   
                   let linkPath = '';
-                  if (activity.activityType === 'completed') {
+                  if (activity.activityType === 'completed' || activity.activityType === 'viewed') {
                     linkPath = `/visualize/${algorithm.slug}`;
-                  } else if (activity.activityType === 'viewed') {
-                    linkPath = `/material/${algorithm.slug}`;
                   } else if (activity.activityType === 'note_created') {
                     linkPath = `/notes/${algorithm.slug}`;
                   }
@@ -546,7 +587,11 @@ export default function Profile() {
                         <span className={`text-xs sm:text-sm ${
                           isDark ? 'text-slate-400' : 'text-gray-500'
                         }`}>
-                          {new Date(activity.completedAt).toLocaleDateString()}
+                          {new Date(activity.completedAt).toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
                         </span>
                       </Link>
                     </motion.div>

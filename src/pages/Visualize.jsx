@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useParams, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -17,9 +18,57 @@ import DijkstraViz from '../visualizations/DijkstraViz';
 
 export default function Visualize() {
   const { id } = useParams();
-  const { hasCompleted } = useAuth();
+  const { hasCompleted, token, user } = useAuth();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  
+  useEffect(() => {
+    const trackView = async () => {
+      if (!token || !user || !id) return;
+      
+      try {
+        const algoResponse = await fetch(`http://localhost:5000/api/algorithms/${id}`);
+        if (!algoResponse.ok) {
+          console.error('Failed to fetch algorithm:', id);
+          return;
+        }
+        const algorithm = await algoResponse.json();
+
+        const response = await fetch('http://localhost:5000/api/progress/complete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            algorithmId: algorithm.id,
+            activityType: 'viewed',
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ View tracked successfully:', {
+            message: data.message,
+            algorithm: algorithm.title,
+            algorithmId: algorithm.id,
+            algorithmSlug: algorithm.slug,
+            user: data.user
+          });
+        } else {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('❌ Error tracking view:', errorData);
+        }
+      } catch (error) {
+        console.error('Error tracking view:', error);
+      }
+    };
+
+    if (hasCompleted(id)) {
+      trackView();
+    }
+  }, [id, token, user, hasCompleted]);
+  
   if (!hasCompleted(id)) return <Navigate to={`/material/${id}`} replace />;
 
   const renderViz = () => {
