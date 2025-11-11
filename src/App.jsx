@@ -3,6 +3,7 @@ import LandingPage from './components/LandingPage'
 import Login from './components/Login'
 import About from './components/About'
 import { AuthProvider } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Dashboard from './pages/Dashboard'
 import Visualize from './pages/Visualize'
@@ -26,10 +27,11 @@ import DijkstraViz from "./visualizations/DijkstraViz";
 
 function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <Router>
+            <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -58,6 +60,7 @@ function App() {
         </Router>
       </AuthProvider>
     </ToastProvider>
+    </ThemeProvider>
   )
 }
 

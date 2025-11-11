@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
 
 const content = {
@@ -49,6 +50,8 @@ const content = {
 export default function Material(){
   const { id } = useParams();
   const { hasCompleted, completeAlgorithm } = useAuth();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const navigate = useNavigate();
   
   const info = content[id] || { title: id, body: 'Learn the core idea, steps, and complexity before visualizing.' };
@@ -61,7 +64,11 @@ export default function Material(){
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className={`min-h-screen transition-colors duration-200 ${
+      isDark 
+        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white' 
+        : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900'
+    }`}>
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
         <motion.div 
@@ -82,13 +89,21 @@ export default function Material(){
           </Link>
         </motion.div>
         <motion.div 
-          className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-5 sm:p-6 lg:p-8 border border-cyan-500/20 shadow-xl shadow-cyan-900/20"
+          className={`backdrop-blur-md rounded-2xl p-5 sm:p-6 lg:p-8 border shadow-xl ${
+            isDark
+              ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
+              : 'bg-white/60 border-cyan-200 shadow-gray-200/20'
+          }`}
           initial={{ opacity:0, y:10 }} 
           animate={{ opacity:1, y:0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <p className="leading-7 sm:leading-8 text-slate-200 text-sm sm:text-base">{info.body}</p>
-          <ul className="mt-4 sm:mt-6 list-disc pl-5 sm:pl-6 text-cyan-100/90 space-y-2 text-sm sm:text-base">
+          <p className={`leading-7 sm:leading-8 text-sm sm:text-base ${
+            isDark ? 'text-slate-200' : 'text-gray-700'
+          }`}>{info.body}</p>
+          <ul className={`mt-4 sm:mt-6 list-disc pl-5 sm:pl-6 space-y-2 text-sm sm:text-base ${
+            isDark ? 'text-cyan-100/90' : 'text-cyan-700'
+          }`}>
             <li>Understand the algorithm idea</li>
             <li>Go through step-by-step example</li>
             <li>Review time and space complexity</li>
@@ -96,7 +111,11 @@ export default function Material(){
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3">
             <Link 
               to={`/dashboard`} 
-              className="bg-slate-700/50 border border-cyan-500/30 px-4 py-3 rounded-xl hover:bg-slate-700/70 hover:border-cyan-400/50 text-cyan-100 transition-all duration-200 text-center active:scale-95"
+              className={`border px-4 py-3 rounded-xl transition-all duration-200 text-center active:scale-95 ${
+                isDark
+                  ? 'bg-slate-700/50 border-cyan-500/30 hover:bg-slate-700/70 hover:border-cyan-400/50 text-cyan-100'
+                  : 'bg-gray-200 border-gray-300 hover:bg-gray-300 hover:border-gray-400 text-gray-700'
+              }`}
             >
               Back
             </Link>

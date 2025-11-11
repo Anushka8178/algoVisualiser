@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const API_URL = 'http://localhost:5000/api';
 
 export default function AlgorithmNavigator({ currentSlug }) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [algorithms, setAlgorithms] = useState([]);
   const [loading, setLoading] = useState(true);
   const { hasCompleted } = useAuth();
@@ -36,24 +39,33 @@ export default function AlgorithmNavigator({ currentSlug }) {
 
   return (
     <div className="w-full mb-6 relative">
-      {}
-      <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-4 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
+      <div className={`backdrop-blur-md rounded-xl p-4 border shadow-xl ${
+        isDark
+          ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
+          : 'bg-gray-100/90 border-cyan-200 shadow-gray-200/20'
+      }`}>
         <div className="flex flex-wrap items-center justify-between gap-4">
-          {}
           <Link
             to="/dashboard"
-            className="flex items-center gap-2 text-cyan-300/90 hover:text-cyan-200 transition-colors px-4 py-2 rounded-lg hover:bg-slate-700/50"
+            className={`flex items-center gap-2 transition-colors px-4 py-2 rounded-lg ${
+              isDark
+                ? 'text-cyan-300/90 hover:text-cyan-200 hover:bg-slate-700/50'
+                : 'text-cyan-600 hover:text-cyan-700 hover:bg-gray-200'
+            }`}
           >
             <span>←</span>
             <span>Dashboard</span>
           </Link>
 
-          {}
           <div className="flex items-center gap-2">
             {prevAlgo && (
               <Link
                 to={hasCompleted(prevAlgo.slug) ? `/visualize/${prevAlgo.slug}` : `/material/${prevAlgo.slug}`}
-                className="flex items-center gap-2 bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-4 py-2 rounded-lg hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all"
+                className={`flex items-center gap-2 border px-4 py-2 rounded-lg transition-all ${
+                  isDark
+                    ? 'bg-slate-700/50 border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50'
+                    : 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300 hover:border-gray-400'
+                }`}
               >
                 <span>◀</span>
                 <span className="hidden sm:inline">Previous</span>
@@ -62,7 +74,11 @@ export default function AlgorithmNavigator({ currentSlug }) {
             {nextAlgo && (
               <Link
                 to={hasCompleted(nextAlgo.slug) ? `/visualize/${nextAlgo.slug}` : `/material/${nextAlgo.slug}`}
-                className="flex items-center gap-2 bg-slate-700/50 border border-cyan-500/30 text-cyan-100 px-4 py-2 rounded-lg hover:bg-slate-700/70 hover:border-cyan-400/50 transition-all"
+                className={`flex items-center gap-2 border px-4 py-2 rounded-lg transition-all ${
+                  isDark
+                    ? 'bg-slate-700/50 border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50'
+                    : 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300 hover:border-gray-400'
+                }`}
               >
                 <span className="hidden sm:inline">Next</span>
                 <span>▶</span>
@@ -70,7 +86,6 @@ export default function AlgorithmNavigator({ currentSlug }) {
             )}
           </div>
 
-          {}
           {currentAlgo && (
             <Link
               to={`/notes/${currentSlug}`}
@@ -83,17 +98,18 @@ export default function AlgorithmNavigator({ currentSlug }) {
 
         </div>
 
-        {}
         {currentAlgo && (
-          <div className="mt-4 pt-4 border-t border-cyan-500/20">
+          <div className={`mt-4 pt-4 border-t ${
+            isDark ? 'border-cyan-500/20' : 'border-gray-300'
+          }`}>
             <div className="flex items-center justify-between text-sm">
-              <div className="text-cyan-300/70">
+              <div className={isDark ? 'text-cyan-300/70' : 'text-gray-600'}>
                 <span className="font-semibold">Current: </span>
-                <span className="text-cyan-200">{currentAlgo.title}</span>
+                <span className={isDark ? 'text-cyan-200' : 'text-cyan-600'}>{currentAlgo.title}</span>
                 <span className="mx-2">•</span>
-                <span className="text-slate-300">{currentAlgo.category}</span>
+                <span className={isDark ? 'text-slate-300' : 'text-gray-500'}>{currentAlgo.category}</span>
               </div>
-              <div className="text-slate-300">
+              <div className={isDark ? 'text-slate-300' : 'text-gray-600'}>
                 {currentIndex + 1} of {algorithms.length}
               </div>
             </div>

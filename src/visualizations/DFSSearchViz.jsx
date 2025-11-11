@@ -2,10 +2,13 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import * as d3 from "d3";
 import { dfsSteps } from "../algos/dfsSteps";
 import { usePlayer } from "../hooks/usePlayer";
+import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
 import AlgorithmNavigator from "../components/AlgorithmNavigator";
 
 export default function DFSInteractivePro({ showNavbar = true, showNavigator = true }) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const svgRef = useRef();
   const dragStartedRef = useRef(false);
   const [nodes, setNodes] = useState([]);
@@ -210,6 +213,10 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
 
     labels.exit().remove();
 
+    const messageBg = isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)";
+    const messageStroke = isDark ? "rgba(34, 211, 238, 0.6)" : "rgba(6, 182, 212, 0.8)";
+    const messageText = isDark ? "#67e8f9" : "#0891b2";
+
     svg
       .append("rect")
       .attr("x", width / 2 - 220)
@@ -217,22 +224,22 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
       .attr("width", 440)
       .attr("height", 38)
       .attr("rx", 8)
-      .attr("fill", "rgba(15, 23, 42, 0.95)")
-      .attr("stroke", "rgba(34, 211, 238, 0.6)")
+      .attr("fill", messageBg)
+      .attr("stroke", messageStroke)
       .attr("stroke-width", 2)
-      .attr("filter", "drop-shadow(0 2px 8px rgba(34, 211, 238, 0.3))");
+      .attr("filter", isDark ? "drop-shadow(0 2px 8px rgba(34, 211, 238, 0.3))" : "drop-shadow(0 2px 8px rgba(6, 182, 212, 0.2))");
 
     svg
       .append("text")
       .attr("x", width / 2)
       .attr("y", 28)
       .attr("text-anchor", "middle")
-      .attr("fill", "#67e8f9")
+      .attr("fill", messageText)
       .attr("font-size", "18px")
       .attr("font-weight", "bold")
       .attr("font-family", "system-ui, -apple-system, sans-serif")
       .text(message);
-  }, [nodes, links, index, startNode, creatingLink, actions]);
+  }, [nodes, links, index, startNode, creatingLink, actions, isDark]);
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
@@ -265,7 +272,13 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
   };
 
   return (
-    <div className={showNavbar ? "min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white" : "w-full"}>
+    <div className={showNavbar 
+      ? `min-h-screen transition-colors duration-200 ${
+          isDark 
+            ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white' 
+            : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900'
+        }`
+      : "w-full"}>
       {showNavbar && <Navbar />}
       <div className={showNavbar ? "max-w-6xl mx-auto px-6 py-8" : "w-full"}>
         {showNavigator && <AlgorithmNavigator currentSlug="dfs" />}
@@ -283,13 +296,21 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
           {playing ? "Pause" : "Play"}
         </button>
         <button 
-          className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
+          className={`border px-3 py-2 rounded-xl transition-all ${
+            isDark
+              ? 'bg-slate-700/50 border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50'
+              : 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300 hover:border-gray-400'
+          }`}
           onClick={stepBackward}
         >
           ◀
         </button>
         <button 
-          className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-3 py-2 rounded-xl transition-all"
+          className={`border px-3 py-2 rounded-xl transition-all ${
+            isDark
+              ? 'bg-slate-700/50 border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50'
+              : 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300 hover:border-gray-400'
+          }`}
           onClick={stepForward}
         >
           ▶
@@ -305,7 +326,11 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
           Replay
         </button>
         <button
-          className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
+          className={`border px-4 py-2 rounded-xl transition-all ${
+            isDark
+              ? 'bg-slate-700/50 border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50'
+              : 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300 hover:border-gray-400'
+          }`}
           onClick={() => {
             reset();
             setNodes([]);
@@ -317,12 +342,18 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
           Reset
         </button>
         <button 
-          className="bg-slate-700/50 border border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50 px-4 py-2 rounded-xl transition-all"
+          className={`border px-4 py-2 rounded-xl transition-all ${
+            isDark
+              ? 'bg-slate-700/50 border-cyan-500/30 text-cyan-100 hover:bg-slate-700/70 hover:border-cyan-400/50'
+              : 'bg-gray-200 border-gray-300 text-gray-700 hover:bg-gray-300 hover:border-gray-400'
+          }`}
           onClick={handleUndo}
         >
           Undo
         </button>
-        <div className="ml-4 flex items-center gap-2 text-cyan-100">
+        <div className={`ml-4 flex items-center gap-2 ${
+          isDark ? 'text-cyan-100' : 'text-gray-700'
+        }`}>
           <label>Speed:</label>
           <input
             type="range"
@@ -339,29 +370,55 @@ export default function DFSInteractivePro({ showNavbar = true, showNavigator = t
         ref={svgRef}
         width="800"
         height="500"
-        className="mt-4 rounded-xl shadow-xl bg-slate-800/40 backdrop-blur-md border border-cyan-500/20 mx-auto block"
+        className={`mt-4 rounded-xl shadow-xl backdrop-blur-md border mx-auto block ${
+          isDark
+            ? 'bg-slate-800/40 border-cyan-500/20'
+            : 'bg-white/60 border-cyan-200'
+        }`}
       ></svg>
 
       <div className="mt-6 w-full max-w-4xl mx-auto">
-        <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20">
+        <div className={`backdrop-blur-md rounded-xl p-5 border shadow-xl ${
+          isDark
+            ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
+            : 'bg-white/60 border-cyan-200 shadow-gray-200/20'
+        }`}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="text-center">
-              <div className="text-sm font-semibold mb-1 text-cyan-300/70">Step Progress</div>
-              <div className="text-2xl font-bold text-white">
-                {index + 1} <span className="text-lg text-cyan-400/60">/ {actions.length || 0}</span>
+              <div className={`text-sm font-semibold mb-1 ${
+                isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+              }`}>Step Progress</div>
+              <div className={`text-2xl font-bold ${
+                isDark ? 'text-white' : 'text-gray-900'
+              }`}>
+                {index + 1} <span className={`text-lg ${
+                  isDark ? 'text-cyan-400/60' : 'text-cyan-600/70'
+                }`}>/ {actions.length || 0}</span>
               </div>
             </div>
             <div className="text-center">
-              <div className="text-sm font-semibold mb-1 text-cyan-300/70">Time Complexity</div>
-              <div className="text-xl font-mono font-bold text-cyan-400">O(V + E)</div>
+              <div className={`text-sm font-semibold mb-1 ${
+                isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+              }`}>Time Complexity</div>
+              <div className={`text-xl font-mono font-bold ${
+                isDark ? 'text-cyan-400' : 'text-cyan-600'
+              }`}>O(V + E)</div>
             </div>
             <div className="text-center">
-              <div className="text-sm font-semibold mb-1 text-cyan-300/70">Space Complexity</div>
-              <div className="text-xl font-mono font-bold text-cyan-400">O(V)</div>
+              <div className={`text-sm font-semibold mb-1 ${
+                isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+              }`}>Space Complexity</div>
+              <div className={`text-xl font-mono font-bold ${
+                isDark ? 'text-cyan-400' : 'text-cyan-600'
+              }`}>O(V)</div>
             </div>
           </div>
-          <div className="pt-4 border-t border-cyan-500/20">
-            <div className="flex flex-wrap justify-center gap-4 text-sm mb-3 text-slate-200">
+          <div className={`pt-4 border-t ${
+            isDark ? 'border-cyan-500/20' : 'border-gray-200'
+          }`}>
+            <div className={`flex flex-wrap justify-center gap-4 text-sm mb-3 ${
+              isDark ? 'text-slate-200' : 'text-gray-700'
+            }`}>
               <span><span className="text-emerald-400">🟩</span> Visited</span>
               <span><span className="text-amber-400">🟧</span> Exploring</span>
               <span><span className="text-red-400">🟥</span> Backtrack</span>

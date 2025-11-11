@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useParams, Navigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import AlgorithmNavigator from '../components/AlgorithmNavigator';
 import BubbleSortViz from '../visualizations/BubbleSortViz';
 import QuickSortViz from '../visualizations/QuickSortViz';
@@ -17,6 +18,8 @@ import DijkstraViz from '../visualizations/DijkstraViz';
 export default function Visualize() {
   const { id } = useParams();
   const { hasCompleted } = useAuth();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   if (!hasCompleted(id)) return <Navigate to={`/material/${id}`} replace />;
 
   const renderViz = () => {
@@ -31,12 +34,18 @@ export default function Visualize() {
       case 'bfs': return <BFSSearchViz showNavbar={false} showNavigator={false} />;
       case 'dfs': return <DFSSearchViz showNavbar={false} showNavigator={false} />;
       case 'dijkstra': return <DijkstraViz showNavbar={false} showNavigator={false} />;
-      default: return <div className="text-center py-20 text-cyan-400">Visualization not available for this algorithm</div>;
+      default: return <div className={`text-center py-20 ${
+        isDark ? 'text-cyan-400' : 'text-cyan-600'
+      }`}>Visualization not available for this algorithm</div>;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className={`min-h-screen transition-colors duration-200 ${
+      isDark 
+        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white' 
+        : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900'
+    }`}>
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <AlgorithmNavigator currentSlug={id} />
@@ -49,7 +58,9 @@ export default function Visualize() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
             {formatTitle(id)}
           </h1>
-          <p className="text-base sm:text-lg font-medium text-cyan-100/80">Visualize step-by-step execution</p>
+          <p className={`text-base sm:text-lg font-medium ${
+            isDark ? 'text-cyan-100/80' : 'text-gray-600'
+          }`}>Visualize step-by-step execution</p>
         </motion.header>
 
         <motion.div
@@ -68,21 +79,45 @@ export default function Visualize() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all duration-300">
-              <div className="text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Time Complexity</div>
-              <div className="text-xl sm:text-2xl font-bold font-mono text-cyan-400">
+            <div className={`backdrop-blur-md rounded-xl p-5 border shadow-xl hover:border-cyan-400/40 transition-all duration-300 ${
+              isDark
+                ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
+                : 'bg-white/60 border-cyan-200 shadow-gray-200/20'
+            }`}>
+              <div className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide ${
+                isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+              }`}>Time Complexity</div>
+              <div className={`text-xl sm:text-2xl font-bold font-mono ${
+                isDark ? 'text-cyan-400' : 'text-cyan-600'
+              }`}>
                 {getTimeComplexity(id)}
               </div>
             </div>
-            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all duration-300">
-              <div className="text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Space Complexity</div>
-              <div className="text-xl sm:text-2xl font-bold font-mono text-cyan-400">
+            <div className={`backdrop-blur-md rounded-xl p-5 border shadow-xl hover:border-cyan-400/40 transition-all duration-300 ${
+              isDark
+                ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
+                : 'bg-white/60 border-cyan-200 shadow-gray-200/20'
+            }`}>
+              <div className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide ${
+                isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+              }`}>Space Complexity</div>
+              <div className={`text-xl sm:text-2xl font-bold font-mono ${
+                isDark ? 'text-cyan-400' : 'text-cyan-600'
+              }`}>
                 {getSpaceComplexity(id)}
               </div>
             </div>
-            <div className="bg-slate-800/40 backdrop-blur-md rounded-xl p-5 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 hover:border-cyan-400/40 transition-all duration-300">
-              <div className="text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide text-cyan-300/70">Algorithm</div>
-              <div className="text-lg sm:text-xl font-bold text-white">{formatTitle(id)}</div>
+            <div className={`backdrop-blur-md rounded-xl p-5 border shadow-xl hover:border-cyan-400/40 transition-all duration-300 ${
+              isDark
+                ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
+                : 'bg-white/60 border-cyan-200 shadow-gray-200/20'
+            }`}>
+              <div className={`text-xs sm:text-sm font-semibold mb-2 uppercase tracking-wide ${
+                isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+              }`}>Algorithm</div>
+              <div className={`text-lg sm:text-xl font-bold ${
+                isDark ? 'text-white' : 'text-gray-900'
+              }`}>{formatTitle(id)}</div>
             </div>
           </motion.div>
         )}
