@@ -23,6 +23,18 @@ const Algorithm = sequelize.define("Algorithm", {
     unique: true,
     allowNull: false,
   },
+  material: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  visualizationUrl: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  visualizationCode: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 });
 
 export default Algorithm;

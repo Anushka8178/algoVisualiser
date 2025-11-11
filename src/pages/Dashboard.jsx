@@ -127,6 +127,29 @@ export default function Dashboard(){
               }`}
             />
           </motion.div>
+        <motion.div 
+          className="mt-4 sm:mt-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+        >
+          <div className="bg-gradient-to-r from-cyan-500/10 via-teal-500/10 to-blue-500/10 border border-cyan-500/20 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-lg shadow-cyan-900/10">
+            <div>
+              <div className="text-sm sm:text-base text-cyan-100/90 font-semibold">Looking for an algorithm that’s not here?</div>
+              <div className="text-xs sm:text-sm text-slate-300/80 mt-1">Ask an educator to add it. We’ll ping them with your request.</div>
+            </div>
+            <Link to="/request">
+              <motion.button 
+                className="w-full sm:w-auto bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 font-semibold px-4 sm:px-6 py-2.5 rounded-xl text-sm shadow-lg hover:shadow-cyan-500/40 transition-all duration-200 flex items-center justify-center gap-2"
+                whileHover={{ scale:1.03 }}
+                whileTap={{ scale:0.97 }}
+              >
+                <span>Request an Algorithm</span>
+                <span>→</span>
+              </motion.button>
+            </Link>
+          </div>
+        </motion.div>
         </header>
 
         {loading ? (

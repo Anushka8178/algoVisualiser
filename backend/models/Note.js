@@ -4,9 +4,21 @@ import User from "./User.js";
 import Algorithm from "./Algorithm.js";
 
 const Note = sequelize.define("Note", {
+  title: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   content: {
     type: DataTypes.TEXT,
-    allowNull: false,
+    allowNull: true,
+  },
+  link: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  filePath: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 });
 

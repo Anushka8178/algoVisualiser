@@ -1,28 +1,41 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import sequelize from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
 import algorithmRoutes from "./routes/algorithmRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
+import educatorRoutes from "./routes/educatorRoutes.js";
+import requestsRoutes from "./routes/requestsRoutes.js";
 
 import "./models/User.js";
 import Algorithm from "./models/Algorithm.js";
 import "./models/Note.js";
 import "./models/UserProgress.js";
+import "./models/Request.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve uploaded files statically
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/algorithms", algorithmRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/progress", progressRoutes);
+app.use("/api/educator", educatorRoutes);
+app.use("/api/requests", requestsRoutes);
 
 sequelize.sync({ alter: true }).then(async () => {
   console.log("Database connected ✅");

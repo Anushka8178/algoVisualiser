@@ -14,6 +14,16 @@ import Register from './pages/Register'
 import Material from './pages/Material'
 import NotFound from './components/NotFound'
 import { ToastProvider } from './components/ToastProvider'
+import RoleRoute from './components/RoleRoute'
+import EducatorDashboard from './pages/educator/Dashboard'
+import EducatorStudents from './pages/educator/Students'
+import EducatorRequests from './pages/educator/Requests'
+import EducatorResources from './pages/educator/Resources'
+import EducatorStreaks from './pages/educator/Streaks'
+import EducatorMessages from './pages/educator/Messages'
+import EducatorNotes from './pages/educator/Notes'
+import AddAlgorithm from './pages/educator/AddAlgorithm'
+import MyAlgorithms from './pages/educator/MyAlgorithms'
 import BubbleSortViz from "./visualizations/BubbleSortViz";
 import QuickSortViz from "./visualizations/QuickSortViz";
 import MergeSortViz from "./visualizations/MergeSortViz";
@@ -24,6 +34,7 @@ import LinearSearchViz from "./visualizations/LinearSearchViz";
 import BFSSearchViz from "./visualizations/BFSSearchViz";
 import DFSSearchViz from "./visualizations/DFSSearchViz";
 import DijkstraViz from "./visualizations/DijkstraViz";
+import RequestAlgorithm from './pages/RequestAlgorithm';
 
 function App() {
   return (
@@ -54,6 +65,18 @@ function App() {
             <Route path="/visualize/dfs" element={<DFSSearchViz />} />
             <Route path="/visualize/dijkstra" element={<DijkstraViz />} />
             <Route path="/visualize/:id" element={<ProtectedRoute><Visualize /></ProtectedRoute>} />
+            <Route path="/request" element={<ProtectedRoute><RequestAlgorithm /></ProtectedRoute>} />
+            {/* Educator routes */}
+            <Route path="/educator" element={<RoleRoute role="educator"><EducatorDashboard /></RoleRoute>} />
+            <Route path="/educator/students" element={<RoleRoute role="educator"><EducatorStudents /></RoleRoute>} />
+            <Route path="/educator/requests" element={<RoleRoute role="educator"><EducatorRequests /></RoleRoute>} />
+            <Route path="/educator/resources" element={<RoleRoute role="educator"><EducatorResources /></RoleRoute>} />
+            <Route path="/educator/streaks" element={<RoleRoute role="educator"><EducatorStreaks /></RoleRoute>} />
+            <Route path="/educator/messages" element={<RoleRoute role="educator"><EducatorMessages /></RoleRoute>} />
+            <Route path="/educator/notes" element={<RoleRoute role="educator"><EducatorNotes /></RoleRoute>} />
+            <Route path="/educator/algorithms" element={<RoleRoute role="educator"><MyAlgorithms /></RoleRoute>} />
+            <Route path="/educator/algorithms/new" element={<RoleRoute role="educator"><AddAlgorithm /></RoleRoute>} />
+            <Route path="/educator/algorithms/edit" element={<RoleRoute role="educator"><AddAlgorithm /></RoleRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
