@@ -118,7 +118,7 @@ export function AuthProvider({ children }) {
     if (!authToken) return;
 
     try {
-      const response = await fetch('http://localhost:5173/api/progress/stats', {
+      const response = await fetch('http://localhost:5000/api/progress/stats', {
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
