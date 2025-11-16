@@ -1,10 +1,12 @@
 import express from "express";
+import { Op } from "sequelize";
 import { authenticate } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/upload.js";
 import User from "../models/User.js";
 import Note from "../models/Note.js";
 import Algorithm from "../models/Algorithm.js";
 import Request from "../models/Request.js";
+import Message from "../models/Message.js";
 
 const router = express.Router();
 
@@ -61,12 +63,60 @@ router.post("/resources", upload.single("file"), async (req, res) => {
   }
 });
 
-// Message a particular student (placeholder)
+// Message a particular student
 router.post("/messages", async (req, res) => {
-  const { studentId, message } = req.body;
-  if (!studentId || !message) return res.status(400).json({ error: "studentId and message are required" });
-  // Persist to a Message model in a real app; here we ack
-  res.json({ message: "Message queued for delivery", studentId });
+  const { studentId, studentIdentifier, subject, message } = req.body;
+
+  if (!message || !message.trim()) {
+    return res.status(400).json({ error: "Message content is required" });
+  }
+
+  let student = null;
+
+  if (studentId) {
+    student = await User.findOne({ where: { id: studentId, role: "student" } });
+  }
+
+  if (!student && studentIdentifier) {
+    const identifier = studentIdentifier.trim();
+    const orConditions = [];
+
+    if (identifier.includes("@")) {
+      orConditions.push({ email: { [Op.iLike]: identifier } });
+    }
+
+    orConditions.push({ username: { [Op.iLike]: identifier } });
+
+    student = await User.findOne({
+      where: {
+        role: "student",
+        [Op.or]: orConditions,
+      },
+    });
+  }
+
+  if (!student) {
+    return res.status(404).json({ error: "Student not found" });
+  }
+
+  const savedMessage = await Message.create({
+    subject: subject && subject.trim() ? subject.trim().slice(0, 150) : "Message from your educator",
+    body: message.trim().slice(0, 5000),
+    educatorId: req.user.id,
+    studentId: student.id,
+  });
+
+  res.json({
+    message: "Message queued for delivery",
+    data: {
+      id: savedMessage.id,
+      student: {
+        id: student.id,
+        username: student.username,
+        email: student.email,
+      },
+    },
+  });
 });
 
 // Manage educator notes (CRUD simplified)

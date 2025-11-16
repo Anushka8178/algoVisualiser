@@ -11,12 +11,14 @@ import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
 import educatorRoutes from "./routes/educatorRoutes.js";
 import requestsRoutes from "./routes/requestsRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 import "./models/User.js";
 import Algorithm from "./models/Algorithm.js";
 import "./models/Note.js";
 import "./models/UserProgress.js";
 import "./models/Request.js";
+import "./models/Message.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,6 +38,7 @@ app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/educator", educatorRoutes);
 app.use("/api/requests", requestsRoutes);
+app.use("/api/messages", messageRoutes);
 
 sequelize.sync({ alter: true }).then(async () => {
   console.log("Database connected ✅");

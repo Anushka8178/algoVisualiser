@@ -4,6 +4,7 @@ import { Op } from "sequelize";
 import User from "../models/User.js";
 import Algorithm from "../models/Algorithm.js";
 import UserProgress from "../models/UserProgress.js";
+import { sendStreakNotification } from "../utils/emailService.js";
 
 const router = express.Router();
 
@@ -37,6 +38,9 @@ router.post("/complete", verifyToken, async (req, res) => {
     }
 
     const today = new Date().toISOString().split("T")[0];
+    const previousStreak = user.streak || 0;
+    let streakChanged = false;
+    let newStreakValue = previousStreak;
     const existingProgress = await UserProgress.findOne({
       where: {
         userId: req.userId,
@@ -76,19 +80,34 @@ router.post("/complete", verifyToken, async (req, res) => {
       const yesterdayStr = yesterday.toISOString().split("T")[0];
 
       if (lastActive === yesterdayStr) {
-
         await user.increment("streak");
+        streakChanged = true;
+        newStreakValue = previousStreak + 1;
       } else if (lastActive !== todayDate) {
-
         await user.update({ streak: 1 });
+        streakChanged = true;
+        newStreakValue = 1;
       }
 
       await user.update({ lastActiveDate: todayDate });
     }
 
     const updatedUser = await User.findByPk(req.userId, {
-      attributes: ["id", "username", "streak", "totalEngagement", "lastActiveDate"],
+      attributes: ["id", "username", "email", "streak", "totalEngagement", "lastActiveDate"],
     });
+
+    if (streakChanged) {
+      try {
+        await sendStreakNotification({
+          userEmail: updatedUser.email,
+          username: updatedUser.username,
+          previousStreak,
+          newStreak: newStreakValue,
+        });
+      } catch (emailError) {
+        console.warn("Failed to send streak email:", emailError.message);
+      }
+    }
 
     res.json({
       message: "Progress tracked successfully",
