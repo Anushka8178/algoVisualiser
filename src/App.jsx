@@ -24,6 +24,8 @@ import EducatorMessages from './pages/educator/Messages'
 import EducatorNotes from './pages/educator/Notes'
 import AddAlgorithm from './pages/educator/AddAlgorithm'
 import MyAlgorithms from './pages/educator/MyAlgorithms'
+import EducatorProfile from './pages/educator/Profile'
+import MessagesInbox from './pages/MessagesInbox'
 import BubbleSortViz from "./visualizations/BubbleSortViz";
 import QuickSortViz from "./visualizations/QuickSortViz";
 import MergeSortViz from "./visualizations/MergeSortViz";
@@ -54,6 +56,7 @@ function App() {
             <Route path="/notes/:id" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/messages" element={<RoleRoute role="student"><MessagesInbox /></RoleRoute>} />
             <Route path="/visualize/bubble-sort" element={<BubbleSortViz />} />
             <Route path="/visualize/quick-sort" element={<QuickSortViz />} />
             <Route path="/visualize/merge-sort" element={<MergeSortViz />} />
@@ -74,6 +77,7 @@ function App() {
             <Route path="/educator/streaks" element={<RoleRoute role="educator"><EducatorStreaks /></RoleRoute>} />
             <Route path="/educator/messages" element={<RoleRoute role="educator"><EducatorMessages /></RoleRoute>} />
             <Route path="/educator/notes" element={<RoleRoute role="educator"><EducatorNotes /></RoleRoute>} />
+            <Route path="/educator/profile" element={<RoleRoute role="educator"><EducatorProfile /></RoleRoute>} />
             <Route path="/educator/algorithms" element={<RoleRoute role="educator"><MyAlgorithms /></RoleRoute>} />
             <Route path="/educator/algorithms/new" element={<RoleRoute role="educator"><AddAlgorithm /></RoleRoute>} />
             <Route path="/educator/algorithms/edit" element={<RoleRoute role="educator"><AddAlgorithm /></RoleRoute>} />

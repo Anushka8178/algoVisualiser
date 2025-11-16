@@ -2,15 +2,48 @@ import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from './ThemeToggle';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
-  const { user, logout, userStats } = useAuth();
+  const { user, logout, userStats, token } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const isStudent = user?.role === 'student';
+
+  useEffect(() => {
+    let ignore = false;
+
+    const loadUnread = async () => {
+      if (!token || user?.role !== 'student') {
+        setUnreadCount(0);
+        return;
+      }
+      try {
+        const res = await fetch('http://localhost:5000/api/messages/unread/count', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!ignore) {
+          setUnreadCount(data.count || 0);
+        }
+      } catch (error) {
+        if (!ignore) {
+          setUnreadCount(0);
+        }
+      }
+    };
+
+    loadUnread();
+
+    return () => {
+      ignore = true;
+    };
+  }, [token, user?.role]);
 
   return (
     <header className={`w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between backdrop-blur-md border-b shadow-lg sticky top-0 z-50 transition-colors duration-200 ${
@@ -52,6 +85,31 @@ export default function Navbar() {
         >
           Leaderboard
         </NavLink>
+        {isStudent && (
+          <NavLink
+            to="/messages"
+            className={({ isActive }) =>
+              `px-3 py-2 rounded-lg transition-all duration-200 ${
+                isActive
+                  ? isDark
+                    ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-400/30'
+                    : 'text-cyan-600 bg-cyan-50 border border-cyan-200'
+                  : isDark
+                    ? 'hover:text-cyan-300 hover:bg-slate-800/50'
+                    : 'hover:text-cyan-600 hover:bg-gray-100'
+              }`
+            }
+          >
+            <span className="inline-flex items-center gap-2">
+              Messages
+              {unreadCount > 0 && (
+                <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-cyan-500/20 px-2 text-xs font-semibold text-cyan-200">
+                  {unreadCount}
+                </span>
+              )}
+            </span>
+          </NavLink>
+        )}
         <NavLink 
           to="/profile" 
           className={({isActive})=> `px-3 py-2 rounded-lg transition-all duration-200 ${
@@ -150,6 +208,30 @@ export default function Navbar() {
               >
                 Leaderboard
               </NavLink>
+              {isStudent && (
+                <NavLink
+                  to="/messages"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) => `px-4 py-3 rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? isDark
+                        ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-400/30'
+                        : 'text-cyan-600 bg-cyan-50 border border-cyan-200'
+                      : isDark
+                        ? 'text-cyan-100 hover:bg-slate-800/50'
+                        : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    Messages
+                    {unreadCount > 0 && (
+                      <span className="inline-flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-cyan-500/20 px-2 text-xs font-semibold text-cyan-200">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </span>
+                </NavLink>
+              )}
               <NavLink
                 to="/profile"
                 onClick={() => setMobileMenuOpen(false)}

@@ -28,27 +28,45 @@ The app also introduces gamification, letting users build learning streaks, comp
 
 - **Sorting**: Bubble, Quick, Merge, Insertion, Heap
 - **Searching**: Linear, Binary
-- **Graph**: BFS, DFS, Dijkstra
-- **More algorithms like pathfinding,linked list etc** - *Planned*
+- **Graph**: BFS, DFS, Dijkstra, Topological Sort
+- **Dynamic D3.js Visualizations**: Educators can add custom algorithm visualizations
+- **More algorithms like pathfinding, linked list etc** - *Planned*
+
+### Student Features
+
+- Request algorithms from educators
+- View algorithm visualizations with interactive controls
+- Access learning materials and resources (PDFs, links)
+- Receive messages from educators
+- Track daily learning streaks
+- View leaderboard rankings
+- Save personal notes for each algorithm
+- Progress history and statistics
+
+### Educator Features
+
+- View and manage student algorithm requests
+- Add new algorithms with custom D3.js visualizations
+- Edit and delete published algorithms
+- Upload learning resources (PDFs, text links)
+- Send messages to students
+- Mark requests as completed
+- View student progress and engagement
 
 ### Gamification
 
-- Daily streak tracking
-- Leaderboards based on engagement
+- Daily streak tracking with email notifications
+- Leaderboards based on engagement (educators excluded)
 - Progress history and resume tracking
-
-### User Features
-
-- Secure authentication (JWT-based)
-- Personalized notes for each algorithm
-- Profile with learning statistics
-- Algorithm theory/material pages
+- Achievement system
 
 ### UI/UX
 
 - Fully responsive layout
 - Smooth animations with Framer Motion
 - Modern design using Tailwind CSS
+- Separate interfaces for students and educators
+- Dark/Light theme support
 
 ---
 
@@ -100,18 +118,35 @@ npm install
 
 ###  Step 3: Set Up Database
 
+**Option A: Automatic Setup (Recommended)**
+
+```bash
+cd backend
+npm run setup-db
+```
+
+This will automatically:
+- Check if `.env` file exists (create if missing)
+- Verify PostgreSQL connection
+- Create database if it doesn't exist
+- Test the connection
+
+**Option B: Manual Setup**
+
 1. Open PostgreSQL (psql) or pgAdmin
 2. Run these commands:
 
 ```sql
+CREATE DATABASE algodb;
+-- OR
 CREATE DATABASE algovisualizer;
 ```
 
 3. Note down your:
    - Username (usually `postgres`)
    - Password
-   - Host (`localhost`)
-   - Port (`5000`) use this port 
+   - Host (`localhost` or `127.0.0.1`)
+   - Port (`5432` or `5433`) 
 
 ###  Step 4: Configure the Backend
 
@@ -124,12 +159,20 @@ cd backend
 2. Create a new `.env` file:
 
 ```env
-DB_NAME=algovisualizer
+DB_NAME=algodb
 DB_USER=postgres
 DB_PASS=your_postgres_password
-DB_HOST=localhost
+DB_HOST=127.0.0.1
+DB_PORT=5433
 PORT=5000
 JWT_SECRET=your_random_secret_key_here
+
+# Email Configuration (Optional - for streak notifications)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+SMTP_FROM=your-email@gmail.com
 ```
 
 ** To generate a secret key easily:**
@@ -189,10 +232,19 @@ VITE v5.x.x  ready in xxx ms
 
 | Error | Solution |
 |-------|----------|
-| Cannot connect to DB | Ensure PostgreSQL is running and `.env` is correct |
+| Cannot connect to DB | Ensure PostgreSQL is running and `.env` is correct. Run `npm run setup-db` in backend folder |
+| Password authentication failed | Check your PostgreSQL password in `.env`. See `backend/FIX_PASSWORD.md` |
 | JWT Secret not defined | Add `JWT_SECRET` to `.env` and restart backend |
 | Blank frontend page | Refresh or check console errors |
 | Module not found | Run `npm install` again |
+| Email not sending | For Gmail, use App Password (not regular password). See `backend/GMAIL_APP_PASSWORD.md` |
+
+## 📚 Additional Documentation
+
+- **Quick Start**: `backend/QUICK_START.md` - Fast setup guide
+- **Database Troubleshooting**: `backend/TROUBLESHOOTING_DB.md` - Fix database connection issues
+- **Email Setup**: `backend/EMAIL_SETUP_GUIDE.md` - Configure email notifications
+- **Gmail App Password**: `backend/GMAIL_APP_PASSWORD.md` - Quick Gmail setup
 
 ---
 
@@ -315,7 +367,11 @@ tech:
 - [ ] Export/import notes
 - [ ] Light mode
 - [ ] Mobile app
-- [ ] Email/Notifications to users regarding streak
+- [x] Email/Notifications to users regarding streak ✅
+- [x] Educator features (add/edit algorithms, manage requests) ✅
+- [x] Student-educator messaging system ✅
+- [x] File uploads for learning resources ✅
+- [x] Dynamic D3.js visualization support ✅
 
 
 Thank you

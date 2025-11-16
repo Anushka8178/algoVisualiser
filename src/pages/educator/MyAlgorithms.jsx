@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import Navbar from '../../components/Navbar';
+import { useState, useEffect, useMemo } from 'react';
+import EducatorLayout from '../../components/EducatorLayout';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -37,10 +37,15 @@ export default function MyAlgorithms() {
     fetchAlgorithms();
   }, [token]);
 
-  const filteredAlgorithms = algorithms.filter(algo =>
-    algo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    algo.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    algo.slug.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAlgorithms = useMemo(
+    () =>
+      algorithms.filter(
+        (algo) =>
+          algo.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          algo.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          algo.slug.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [algorithms, searchQuery],
   );
 
   const handleDelete = async (algorithm) => {
@@ -72,103 +77,95 @@ export default function MyAlgorithms() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-700 via-fuchsia-600 to-rose-500 text-white">
-      <Navbar />
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-4xl font-extrabold drop-shadow">My Algorithms</h1>
-            <p className="text-white/90 mt-2">Manage and edit your published algorithms</p>
-          </div>
-          <Link
-            to="/educator/algorithms/new"
-            className="bg-white text-purple-700 px-6 py-3 rounded-xl font-semibold hover:bg-purple-50 transition shadow-lg"
-          >
-            + Add New Algorithm
-          </Link>
-        </div>
-
-        <div className="mb-6">
+    <EducatorLayout
+      heading="My Algorithms"
+      subheading="All algorithms you have published live here. Edit content, refine visualisations, or prune outdated entries."
+      accent="teal"
+    >
+      <div className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="w-full sm:w-auto">
           <input
             type="text"
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search algorithms..."
-            className="w-full sm:w-96 px-4 py-3 rounded-xl bg-white/20 border border-white/30 placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by title, category, or slug"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-400/40 sm:w-72"
           />
         </div>
+        <Link
+          to="/educator/algorithms/new"
+          className="inline-flex items-center justify-center rounded-full border border-cyan-300/60 bg-cyan-500/25 px-5 py-3 text-sm font-semibold text-white transition hover:border-cyan-200/80 hover:bg-cyan-500/30"
+        >
+          + Add new algorithm
+        </Link>
+      </div>
 
-        {loading && (
-          <div className="text-center py-20 text-white/80">Loading algorithms...</div>
-        )}
+      {loading && <div className="rounded-3xl border border-white/10 bg-white/5 py-16 text-center text-slate-100/80">Loading algorithms…</div>}
+      {error && <div className="rounded-3xl border border-rose-400/40 bg-rose-500/15 py-16 text-center text-rose-100">{error}</div>}
 
-        {error && (
-          <div className="text-center py-20 text-red-200">{error}</div>
-        )}
-
-        {!loading && !error && (
-          <>
-            {filteredAlgorithms.length === 0 ? (
-              <div className="text-center py-20 text-white/80">
-                {searchQuery ? 'No algorithms match your search.' : 'No algorithms published yet.'}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredAlgorithms.map((algo, index) => (
-                  <motion.div
-                    key={algo.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20 shadow-lg hover:scale-[1.02] transition"
-                  >
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold mb-1">{algo.title}</h3>
-                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+      {!loading && !error && (
+        <>
+          {filteredAlgorithms.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-white/20 bg-white/5 py-16 text-center text-slate-200/70">
+              {searchQuery ? 'No algorithms match that search.' : 'No algorithms published yet.'}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {filteredAlgorithms.map((algo, index) => (
+                <motion.article
+                  key={algo.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: index * 0.05 }}
+                  className="flex h-full flex-col justify-between rounded-3xl border border-white/10 bg-slate-900/50 p-6 shadow-lg shadow-slate-900/30 backdrop-blur transition hover:-translate-y-1 hover:border-cyan-200/40"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">{algo.title}</h3>
+                        <span className="mt-1 inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-cyan-100">
                           {algo.category}
                         </span>
                       </div>
                     </div>
-                    <p className="text-white/80 text-sm mb-4 line-clamp-2">
-                      {algo.description}
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-white/60 mb-4">
-                      <span>Complexity: {algo.complexity}</span>
-                      <span>Slug: {algo.slug}</span>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex gap-2">
-                        <Link
-                          to={`/educator/algorithms/edit?slug=${algo.slug}`}
-                          className="flex-1 bg-white text-purple-700 px-3 py-2 rounded-lg font-semibold hover:bg-purple-50 transition text-center text-xs"
-                        >
-                          Edit
-                        </Link>
-                        <Link
-                          to={`/material/${algo.slug}`}
-                          target="_blank"
-                          className="flex-1 bg-white/20 text-white px-3 py-2 rounded-lg font-semibold hover:bg-white/30 transition text-center text-xs"
-                        >
-                          View
-                        </Link>
-                      </div>
-                      <button
-                        onClick={() => handleDelete(algo)}
-                        disabled={deletingId === algo.id}
-                        className="w-full bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition text-center text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    <p className="text-sm text-slate-200/80 line-clamp-3">{algo.description}</p>
+                    <dl className="flex flex-wrap gap-3 text-xs text-slate-200/70">
+                      <div className="rounded-full bg-white/5 px-3 py-1">Complexity: {algo.complexity}</div>
+                      <div className="rounded-full bg-white/5 px-3 py-1">Slug: {algo.slug}</div>
+                    </dl>
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    <div className="flex gap-2 text-xs font-semibold">
+                      <Link
+                        to={`/educator/algorithms/edit?slug=${algo.slug}`}
+                        className="flex-1 rounded-full border border-cyan-300/60 bg-cyan-500/25 px-4 py-2 text-center text-cyan-50 transition hover:border-cyan-200/80 hover:bg-cyan-500/30"
                       >
-                        {deletingId === algo.id ? 'Deleting...' : 'Delete Algorithm'}
-                      </button>
+                        Edit
+                      </Link>
+                      <Link
+                        to={`/material/${algo.slug}`}
+                        target="_blank"
+                        className="flex-1 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-center text-white transition hover:border-white/30 hover:bg-white/15"
+                      >
+                        Preview material
+                      </Link>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+                    <button
+                      onClick={() => handleDelete(algo)}
+                      disabled={deletingId === algo.id}
+                      className="w-full rounded-full border border-rose-400/50 bg-rose-500/20 px-4 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-500/25 disabled:opacity-60"
+                    >
+                      {deletingId === algo.id ? 'Deleting…' : 'Delete algorithm'}
+                    </button>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </EducatorLayout>
   );
 }
 
