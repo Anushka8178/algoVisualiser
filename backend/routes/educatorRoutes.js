@@ -24,7 +24,10 @@ router.get("/students", async (_req, res) => {
 
 // View all learning streaks (summary)
 router.get("/streaks", async (_req, res) => {
-  const students = await User.findAll({ where: { role: "student" }, attributes: ["id", "username", "streak"] });
+  const students = await User.findAll({
+    where: { role: "student" },
+    attributes: ["id", "username", "streak", "totalEngagement"],
+  });
   res.json({ students });
 });
 
@@ -121,8 +124,48 @@ router.post("/messages", async (req, res) => {
 
 // Manage educator notes (CRUD simplified)
 router.get("/notes", async (_req, res) => {
-  const notes = await Note.findAll({ where: { userId: null }, include: [{ model: Algorithm, attributes: ["id","title","slug"] }], limit: 50, order: [["createdAt","DESC"]] });
+  const notes = await Note.findAll({
+    where: { userId: null },
+    include: [{ model: Algorithm, attributes: ["id", "title", "slug"] }],
+    limit: 50,
+    order: [["createdAt", "DESC"]],
+  });
   res.json({ notes });
+});
+
+router.post("/notes", async (req, res) => {
+  try {
+    const { title, content, algorithmSlug } = req.body || {};
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: "Content is required" });
+    }
+
+    let algorithmId = null;
+    if (algorithmSlug) {
+      const algorithm = await Algorithm.findOne({ where: { slug: algorithmSlug } });
+      if (!algorithm) {
+        return res.status(404).json({ error: "Algorithm not found for provided slug" });
+      }
+      algorithmId = algorithm.id;
+    }
+
+    const note = await Note.create({
+      title: title?.trim().slice(0, 150) || null,
+      content: content.trim(),
+      algorithmId,
+      userId: null,
+    });
+
+    const created = await Note.findByPk(note.id, {
+      include: [{ model: Algorithm, attributes: ["id", "title", "slug"] }],
+    });
+
+    res.status(201).json({ note: created });
+  } catch (error) {
+    console.error("Error creating educator note:", error);
+    res.status(500).json({ error: "Failed to create note" });
+  }
 });
 
 export default router;
