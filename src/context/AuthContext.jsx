@@ -118,7 +118,7 @@ export function AuthProvider({ children }) {
     if (!authToken) return;
 
     try {
-      const response = await fetch('http://localhost:5173/api/progress/stats', {
+      const response = await fetch('http://localhost:5000/api/progress/stats', {
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
@@ -187,6 +187,16 @@ export function AuthProvider({ children }) {
         const data = await response.json();
         setCompletedAlgorithms(prev => [...prev, slug]);
 
+        // Immediately update user stats with the response data if available
+        if (data.user) {
+          setUserStats(prev => ({
+            ...prev,
+            streak: data.user.streak,
+            totalEngagement: data.user.totalEngagement,
+          }));
+        }
+
+        // Also fetch fresh stats to ensure everything is up to date
         await fetchUserStats(token);
       }
     } catch (error) {
@@ -198,8 +208,18 @@ export function AuthProvider({ children }) {
     if (token) {
       fetchUserStats(token);
     }
-
   }, [token, user?.id]);
+
+  // Refresh stats periodically to keep streak updated
+  useEffect(() => {
+    if (!token) return;
+
+    const interval = setInterval(() => {
+      fetchUserStats(token);
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [token]);
 
   const value = useMemo(() => ({
     token,

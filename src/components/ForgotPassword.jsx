@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { useToast } from './ToastProvider';
 
@@ -47,13 +46,12 @@ const validatePassword = (password) => {
   return null;
 };
 
-export default function Login() {
-  const { login } = useAuth();
+export default function ForgotPassword() {
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email:'', password:'' });
-  const [errors, setErrors] = useState({ email:'', password:'' });
-  const [touched, setTouched] = useState({ email:false, password:false });
+  const [form, setForm] = useState({ email: '', password: '', confirm: '' });
+  const [errors, setErrors] = useState({ email: '', password: '', confirm: '' });
+  const [touched, setTouched] = useState({ email: false, password: false, confirm: false });
   const [submitting, setSubmitting] = useState(false);
 
   const handleBlur = (field) => {
@@ -67,6 +65,12 @@ export default function Login() {
       error = validateEmail(value) || '';
     } else if (field === 'password') {
       error = validatePassword(value) || '';
+    } else if (field === 'confirm') {
+      if (!value) {
+        error = 'Please confirm your password';
+      } else if (value !== form.password) {
+        error = 'Passwords do not match';
+      }
     }
     setErrors(prev => ({ ...prev, [field]: error }));
     return !error;
@@ -76,35 +80,62 @@ export default function Login() {
     setForm(prev => ({ ...prev, [field]: value }));
     if (touched[field]) {
       validateField(field, value);
+      if (field === 'password' && touched.confirm) {
+        validateField('confirm', form.confirm);
+      }
     }
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     
-    setTouched({ email: true, password: true });
+    setTouched({ email: true, password: true, confirm: true });
     
     const emailValid = validateField('email', form.email);
     const passwordValid = validateField('password', form.password);
+    const confirmValid = validateField('confirm', form.confirm);
 
-    if (!emailValid || !passwordValid) {
+    if (!emailValid || !passwordValid || !confirmValid) {
       showToast('Please fix the errors in the form', 'error');
       return;
     }
 
+    if (form.password !== form.confirm) {
+      showToast('Passwords do not match', 'error');
+      return;
+    }
+
     setSubmitting(true);
-    const res = await login({ email: form.email.trim(), password: form.password });
-    setSubmitting(false);
-    if(res.success){
-      showToast('Welcome back!', 'success');
-      navigate(res.role === 'educator' ? '/educator' : '/dashboard');
-    } else {
-      showToast(res.message || 'Login failed', 'error');
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: form.email.trim(), 
+          password: form.password 
+        }),
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        showToast('Password reset successfully!', 'success');
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
+      } else {
+        showToast(data.error || 'Failed to reset password', 'error');
+      }
+    } catch (err) {
+      console.error('Forgot password error:', err);
+      showToast('An error occurred. Please try again.', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
-  
-  const goToEducatorSignup = () => navigate('/register?role=educator');
-  const goToStudentSignup = () => navigate('/register?role=student');
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <motion.div
@@ -135,10 +166,10 @@ export default function Login() {
       />
 
       <Link
-        to="/"
+        to="/login"
         className="absolute top-6 left-6 text-cyan-300/80 hover:text-cyan-200 transition-colors flex items-center gap-2 z-10"
       >
-        <span>←</span>         Back to Home
+        <span>←</span> Back to Login
       </Link>
 
       <motion.div
@@ -153,7 +184,7 @@ export default function Login() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          Welcome Back
+          Forgot Password?
         </motion.h1>
         <motion.p
           className="text-center mb-8 text-cyan-100/80"
@@ -161,7 +192,7 @@ export default function Login() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          Sign in to continue your learning journey
+          Enter your email and new password to reset your account
         </motion.p>
 
         <form className="space-y-6" onSubmit={onSubmit}>
@@ -176,7 +207,7 @@ export default function Login() {
             <input
               type="email"
               value={form.email}
-              onChange={e=>handleChange('email', e.target.value)}
+              onChange={e => handleChange('email', e.target.value)}
               onBlur={() => handleBlur('email')}
               placeholder="your@email.com"
               className={`w-full px-4 py-3 rounded-xl bg-slate-800/50 border text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 transition-all duration-200 ${
@@ -198,18 +229,13 @@ export default function Login() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-cyan-300/70">
-                Password <span className="text-red-400">*</span>
-              </label>
-              <Link to="/forgot-password" className="text-sm text-cyan-300 hover:text-cyan-200 underline">
-                Forgot password?
-              </Link>
-            </div>
+            <label className="block text-sm font-medium mb-2 text-cyan-300/70">
+              New Password <span className="text-red-400">*</span>
+            </label>
             <input
               type="password"
               value={form.password}
-              onChange={e=>handleChange('password', e.target.value)}
+              onChange={e => handleChange('password', e.target.value)}
               onBlur={() => handleBlur('password')}
               placeholder="••••••••"
               className={`w-full px-4 py-3 rounded-xl bg-slate-800/50 border text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 transition-all duration-200 ${
@@ -222,10 +248,38 @@ export default function Login() {
               <p className="mt-1 text-xs text-red-400">{errors.password}</p>
             )}
             {touched.password && !errors.password && form.password && (
-              <p className="mt-1 text-xs text-green-400">✓ Valid password format</p>
+              <p className="mt-1 text-xs text-green-400">✓ Valid password</p>
             )}
             {!touched.password && (
-              <p className="mt-1 text-xs text-cyan-300/60">Enter your password (min 6 chars, uppercase, lowercase, number, special char)</p>
+              <p className="mt-1 text-xs text-cyan-300/60">Min 6 chars, uppercase, lowercase, number, special char</p>
+            )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+          >
+            <label className="block text-sm font-medium mb-2 text-cyan-300/70">
+              Confirm Password <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="password"
+              value={form.confirm}
+              onChange={e => handleChange('confirm', e.target.value)}
+              onBlur={() => handleBlur('confirm')}
+              placeholder="••••••••"
+              className={`w-full px-4 py-3 rounded-xl bg-slate-800/50 border text-white placeholder-cyan-200/50 focus:outline-none focus:ring-2 transition-all duration-200 ${
+                touched.confirm && errors.confirm
+                  ? 'border-red-500/50 focus:ring-red-400/50 focus:border-red-400/50'
+                  : 'border-cyan-500/30 focus:ring-cyan-400/50 focus:border-cyan-400/50'
+              }`}
+            />
+            {touched.confirm && errors.confirm && (
+              <p className="mt-1 text-xs text-red-400">{errors.confirm}</p>
+            )}
+            {touched.confirm && !errors.confirm && form.confirm && form.password === form.confirm && (
+              <p className="mt-1 text-xs text-green-400">✓ Passwords match</p>
             )}
           </motion.div>
 
@@ -237,9 +291,9 @@ export default function Login() {
             whileTap={{ scale: submitting ? 1 : 0.98 }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
           >
-            {submitting? 'Signing in...' : 'Sign In'}
+            {submitting ? 'Resetting...' : 'Reset Password'}
           </motion.button>
         </form>
 
@@ -249,15 +303,10 @@ export default function Login() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          Don't have an account?{' '}
-          <Link to="/register" className="text-cyan-300 hover:text-cyan-200 underline font-medium">
-            Sign up
+          Remember your password?{' '}
+          <Link to="/login" className="text-cyan-300 hover:text-cyan-200 underline font-medium">
+            Sign in
           </Link>
-          <div className="mt-3 flex items-center justify-center gap-3">
-            <button onClick={goToStudentSignup} className="text-cyan-300 hover:text-cyan-200 underline">I’m a Student</button>
-            <span className="text-cyan-100/50">|</span>
-            <button onClick={goToEducatorSignup} className="text-cyan-300 hover:text-cyan-200 underline">I’m an Educator</button>
-          </div>
         </motion.div>
       </motion.div>
     </div>

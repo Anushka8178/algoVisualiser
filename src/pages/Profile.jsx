@@ -81,18 +81,6 @@ export default function Profile() {
     return acc;
   }, {});
 
-  const activityByDay = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (6 - i));
-    const dateStr = date.toISOString().split('T')[0];
-    const count = history.filter(h => {
-      const activityDate = new Date(h.completedAt).toISOString().split('T')[0];
-      return activityDate === dateStr;
-    }).length;
-    return { day: date.toLocaleDateString('en-US', { weekday: 'short' }), count };
-  });
-
-  const maxActivity = Math.max(...activityByDay.map(d => d.count), 1);
 
   const SkeletonCard = () => (
     <div className="bg-slate-800/40 backdrop-blur-md rounded-2xl p-6 border border-cyan-500/20 shadow-xl shadow-cyan-900/20 animate-pulse">
@@ -307,108 +295,60 @@ export default function Profile() {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <motion.div 
-            className={`lg:col-span-2 backdrop-blur-md rounded-2xl p-5 sm:p-6 border shadow-xl ${
-              isDark
-                ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
-                : 'bg-white/60 border-cyan-200 shadow-gray-200/20'
-            }`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className={`text-lg sm:text-xl font-semibold ${
-                isDark ? 'text-cyan-300/90' : 'text-cyan-700'
-              }`}>Learning Analytics</h2>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <div className={`text-sm mb-3 ${
-                  isDark ? 'text-slate-300/70' : 'text-gray-600'
-                }`}>Activity (Last 7 Days)</div>
-                <div className="flex items-end justify-between gap-2 h-32">
-                  {activityByDay.map((day, idx) => (
-                    <motion.div
-                      key={idx}
-                      className="flex-1 flex flex-col items-center gap-2"
-                      initial={{ opacity: 0, scaleY: 0 }}
-                      animate={{ opacity: 1, scaleY: 1 }}
-                      transition={{ duration: 0.5, delay: 0.6 + idx * 0.1 }}
-                    >
-                      <div className={`w-full rounded-t-lg relative overflow-hidden group ${
-                        isDark ? 'bg-slate-700/30' : 'bg-gray-200'
-                      }`}>
-                        <motion.div
-                          className={`w-full ${day.count > 0 ? 'bg-gradient-to-t from-cyan-500 to-teal-500' : isDark ? 'bg-slate-700/50' : 'bg-gray-300'} rounded-t-lg transition-all duration-300 group-hover:opacity-80`}
-                          style={{ height: `${(day.count / maxActivity) * 100}%` }}
-                          whileHover={{ scale: 1.05 }}
-                        />
-                        {day.count > 0 && (
-                          <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
-                            {day.count}
-                          </div>
-                        )}
-                      </div>
-                      <div className={`text-xs ${
-                        isDark ? 'text-slate-400' : 'text-gray-500'
-                      }`}>{day.day}</div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            className={`backdrop-blur-md rounded-2xl p-5 sm:p-6 border shadow-xl ${
-              isDark
-                ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
-                : 'bg-white/60 border-cyan-200 shadow-gray-200/20'
-            }`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            <div className="flex flex-col items-center text-center mb-4">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white grid place-items-center text-2xl sm:text-3xl font-bold shadow-lg shadow-cyan-500/50 mb-4">
+        {/* User Profile Card */}
+        <motion.div 
+          className={`backdrop-blur-md rounded-2xl p-6 sm:p-8 border shadow-xl mb-6 sm:mb-8 ${
+            isDark
+              ? 'bg-slate-800/40 border-cyan-500/20 shadow-cyan-900/20'
+              : 'bg-white/60 border-cyan-200 shadow-gray-200/20'
+          }`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white grid place-items-center text-3xl sm:text-4xl font-bold shadow-lg shadow-cyan-500/50">
                 {user.username?.[0]?.toUpperCase() || 'U'}
               </div>
-              <div className={`text-lg sm:text-xl font-semibold mb-1 ${
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h2 className={`text-2xl sm:text-3xl font-bold mb-2 ${
                 isDark ? 'text-white' : 'text-gray-900'
-              }`}>{user.username}</div>
-              <div className={`text-sm break-all ${
+              }`}>{user.username}</h2>
+              <p className={`text-sm sm:text-base mb-6 break-all ${
                 isDark ? 'text-slate-300/80' : 'text-gray-600'
-              }`}>{user.email}</div>
-            </div>
-            <div className={`pt-4 border-t ${
-              isDark ? 'border-cyan-500/20' : 'border-cyan-200'
-            }`}>
-              <div className={`text-xs mb-2 uppercase tracking-wide ${
-                isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
-              }`}>Overall Progress</div>
-              <div className={`text-2xl sm:text-3xl font-bold mb-2 ${
-                isDark ? 'text-cyan-400' : 'text-cyan-600'
-              }`}>{completionPercentage}%</div>
-              <div className={`w-full rounded-full h-2 overflow-hidden ${
-                isDark ? 'bg-slate-700/30' : 'bg-gray-200'
+              }`}>{user.email}</p>
+              <div className={`pt-6 border-t ${
+                isDark ? 'border-cyan-500/20' : 'border-cyan-200'
               }`}>
-                <motion.div
-                  className="h-full bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${completionPercentage}%` }}
-                  transition={{ duration: 1, delay: 0.8 }}
-                />
-              </div>
-              <div className={`text-xs mt-2 ${
-                isDark ? 'text-slate-300/60' : 'text-gray-600'
-              }`}>
-                {completedCount} of {totalAlgorithms} algorithms completed
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`text-sm uppercase tracking-wide font-semibold ${
+                    isDark ? 'text-cyan-300/70' : 'text-cyan-600/80'
+                  }`}>Overall Progress</div>
+                  <div className={`text-2xl sm:text-3xl font-bold ${
+                    isDark ? 'text-cyan-400' : 'text-cyan-600'
+                  }`}>{completionPercentage}%</div>
+                </div>
+                <div className={`w-full rounded-full h-3 overflow-hidden mb-2 ${
+                  isDark ? 'bg-slate-700/30' : 'bg-gray-200'
+                }`}>
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${completionPercentage}%` }}
+                    transition={{ duration: 1, delay: 0.7 }}
+                  />
+                </div>
+                <p className={`text-xs sm:text-sm ${
+                  isDark ? 'text-slate-300/60' : 'text-gray-600'
+                }`}>
+                  {completedCount} of {totalAlgorithms} algorithms completed
+                </p>
               </div>
             </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <motion.div 
@@ -419,7 +359,7 @@ export default function Profile() {
             }`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             <h2 className={`text-lg sm:text-xl font-semibold mb-4 sm:mb-6 ${
               isDark ? 'text-cyan-300/90' : 'text-cyan-700'
@@ -446,7 +386,7 @@ export default function Profile() {
                         className="h-full bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${percentage}%` }}
-                        transition={{ duration: 1, delay: 0.8 + idx * 0.1 }}
+                        transition={{ duration: 1, delay: 0.7 + idx * 0.1 }}
                       />
                     </div>
                     <div className={`text-xs mt-1 ${
@@ -466,7 +406,7 @@ export default function Profile() {
             }`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
           >
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h2 className={`text-lg sm:text-xl font-semibold ${
@@ -521,7 +461,7 @@ export default function Profile() {
                       key={idx}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.9 + idx * 0.05 }}
+                      transition={{ duration: 0.3, delay: 0.8 + idx * 0.05 }}
                     >
                       <Link
                         to={linkPath}
