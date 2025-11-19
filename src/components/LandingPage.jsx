@@ -158,7 +158,7 @@ export default function LandingPage() {
           delay: 1.2
         }}
       >
-        © 2025 Algorithm Visualizer Team
+        © 2025 algoVisualizer
       </motion.footer>
     </div>
   );
