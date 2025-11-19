@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../components/ToastProvider';
 import EducatorLayout from '../../components/EducatorLayout';
 
 export default function Messages() {
   const { token } = useAuth();
+  const { showToast } = useToast();
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
-  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
@@ -40,15 +41,18 @@ export default function Messages() {
 
   const submit = async (e) => {
     e.preventDefault();
-    setStatus(null);
+    if (!token) {
+      showToast('Please log in to send messages', 'error');
+      return;
+    }
 
     if (!message.trim()) {
-      setStatus('Enter a message before sending.');
+      showToast('Please enter a message before sending', 'error');
       return;
     }
 
     if (!selectedStudentId && !search.trim()) {
-      setStatus('Select a student by name or email.');
+      showToast('Please select a student by name or email', 'error');
       return;
     }
 
@@ -66,14 +70,21 @@ export default function Messages() {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        setStatus('Message queued for delivery ✅');
+        showToast('Message sent successfully!', 'success');
         setMessage('');
         setSubject('');
+        setSearch('');
+        setSelectedStudentId('');
       } else {
-        setStatus(data.error || 'Failed to send message');
+        if (res.status === 401 || res.status === 403) {
+          showToast('Session expired. Please log in again.', 'error');
+        } else {
+          showToast(data.error || 'Failed to send message', 'error');
+        }
       }
     } catch (err) {
-      setStatus(err.message || 'Failed to send message');
+      showToast('Network error. Please try again.', 'error');
+      console.error('Message send error:', err);
     } finally {
       setSending(false);
     }
@@ -145,9 +156,8 @@ export default function Messages() {
             disabled={sending}
             className="rounded-full border border-cyan-300/60 bg-cyan-500/20 px-6 py-3 text-sm font-semibold text-cyan-100 transition hover:border-cyan-200/80 hover:bg-cyan-500/25 disabled:opacity-60"
           >
-            {sending ? 'Sending…' : 'Queue message'}
+            {sending ? 'Sending…' : 'Send message'}
           </button>
-          {status && <span className="text-sm text-slate-100/90">{status}</span>}
         </div>
       </form>
     </EducatorLayout>

@@ -1,9 +1,11 @@
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, Navigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import AlgorithmNavigator from '../components/AlgorithmNavigator';
+import DynamicVisualization from '../components/DynamicVisualization';
 import BubbleSortViz from '../visualizations/BubbleSortViz';
 import QuickSortViz from '../visualizations/QuickSortViz';
 import MergeSortViz from '../visualizations/MergeSortViz';
@@ -15,30 +17,129 @@ import BFSSearchViz from '../visualizations/BFSSearchViz';
 import DFSSearchViz from '../visualizations/DFSSearchViz';
 import DijkstraViz from '../visualizations/DijkstraViz';
 
+const API_URL = 'http://localhost:5000/api';
+const BUILT_IN_ALGOS = [
+  'bubble-sort',
+  'quick-sort',
+  'merge-sort',
+  'insertion-sort',
+  'heap-sort',
+  'binary-search',
+  'linear-search',
+  'bfs',
+  'dfs',
+  'dijkstra',
+];
+
 export default function Visualize() {
   const { id } = useParams();
   const { hasCompleted } = useAuth();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [algorithm, setAlgorithm] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   if (!hasCompleted(id)) return <Navigate to={`/material/${id}`} replace />;
 
-  const renderViz = () => {
-    switch(id) {
-      case 'bubble-sort': return <BubbleSortViz showNavbar={false} showNavigator={false} />;
-      case 'quick-sort': return <QuickSortViz showNavbar={false} showNavigator={false} />;
-      case 'merge-sort': return <MergeSortViz showNavbar={false} showNavigator={false} />;
-      case 'insertion-sort': return <InsertionSortViz showNavbar={false} showNavigator={false} />;
-      case 'heap-sort': return <HeapSortViz showNavbar={false} showNavigator={false} />;
-      case 'binary-search': return <BinarySearchViz showNavbar={false} showNavigator={false} />;
-      case 'linear-search': return <LinearSearchViz showNavbar={false} showNavigator={false} />;
-      case 'bfs': return <BFSSearchViz showNavbar={false} showNavigator={false} />;
-      case 'dfs': return <DFSSearchViz showNavbar={false} showNavigator={false} />;
-      case 'dijkstra': return <DijkstraViz showNavbar={false} showNavigator={false} />;
-      default: return <div className={`text-center py-20 ${
-        isDark ? 'text-cyan-400' : 'text-cyan-600'
-      }`}>Visualization not available for this algorithm</div>;
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(null);
+    setAlgorithm(null);
+
+    if (BUILT_IN_ALGOS.includes(id)) {
+      setLoading(false);
+      return undefined;
     }
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/algorithms/${id}`);
+        if (!active) return;
+
+        if (res.ok) {
+          const data = await res.json();
+          setAlgorithm(data);
+        } else if (res.status === 404) {
+          setError('Algorithm not found');
+        } else {
+          setError('Unable to load visualization data.');
+        }
+      } catch (err) {
+        if (!active) return;
+        console.error('Visualization fetch failed:', err);
+        setError('Network error while loading visualization.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  const useDynamicViz = useMemo(() => {
+    return !BUILT_IN_ALGOS.includes(id) && !!algorithm?.visualizationCode;
+  }, [id, algorithm]);
+
+  const renderViz = () => {
+    if (BUILT_IN_ALGOS.includes(id)) {
+      switch (id) {
+        case 'bubble-sort': return <BubbleSortViz showNavbar={false} showNavigator={false} />;
+        case 'quick-sort': return <QuickSortViz showNavbar={false} showNavigator={false} />;
+        case 'merge-sort': return <MergeSortViz showNavbar={false} showNavigator={false} />;
+        case 'insertion-sort': return <InsertionSortViz showNavbar={false} showNavigator={false} />;
+        case 'heap-sort': return <HeapSortViz showNavbar={false} showNavigator={false} />;
+        case 'binary-search': return <BinarySearchViz showNavbar={false} showNavigator={false} />;
+        case 'linear-search': return <LinearSearchViz showNavbar={false} showNavigator={false} />;
+        case 'bfs': return <BFSSearchViz showNavbar={false} showNavigator={false} />;
+        case 'dfs': return <DFSSearchViz showNavbar={false} showNavigator={false} />;
+        case 'dijkstra': return <DijkstraViz showNavbar={false} showNavigator={false} />;
+        default:
+          break;
+      }
+    }
+
+    if (loading) {
+      return (
+        <div className={`text-center py-16 text-lg ${isDark ? 'text-cyan-200/80' : 'text-cyan-700/80'}`}>
+          Loading visualization…
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className={`text-center py-16 text-lg ${isDark ? 'text-red-300' : 'text-red-600'}`}>
+          {error}
+        </div>
+      );
+    }
+
+    if (useDynamicViz) {
+      return (
+        <DynamicVisualization
+          code={algorithm.visualizationCode}
+          width={900}
+          height={520}
+        />
+      );
+    }
+
+    return (
+      <div className={`text-center py-20 ${
+        isDark ? 'text-cyan-400' : 'text-cyan-600'
+      }`}>
+        Visualization not available for this algorithm
+      </div>
+    );
   };
+
+  const headerTitle = algorithm?.title || formatTitle(id);
+  const timeComplexity = algorithm?.complexity || getTimeComplexity(id);
+  const spaceComplexity = algorithm?.spaceComplexity || getSpaceComplexity(id);
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
@@ -56,7 +157,7 @@ export default function Visualize() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
-            {formatTitle(id)}
+            {headerTitle}
           </h1>
           <p className={`text-base sm:text-lg font-medium ${
             isDark ? 'text-cyan-100/80' : 'text-gray-600'
@@ -72,7 +173,7 @@ export default function Visualize() {
           {renderViz()}
         </motion.div>
 
-        {!['bubble-sort', 'insertion-sort', 'heap-sort', 'merge-sort', 'quick-sort', 'binary-search', 'linear-search', 'bfs', 'dfs', 'dijkstra'].includes(id) && (
+        {(!BUILT_IN_ALGOS.includes(id) || algorithm) && (
           <motion.div 
             className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
             initial={{ opacity: 0, y: 20 }}
@@ -90,7 +191,7 @@ export default function Visualize() {
               <div className={`text-xl sm:text-2xl font-bold font-mono ${
                 isDark ? 'text-cyan-400' : 'text-cyan-600'
               }`}>
-                {getTimeComplexity(id)}
+                {timeComplexity || 'Varies'}
               </div>
             </div>
             <div className={`backdrop-blur-md rounded-xl p-5 border shadow-xl hover:border-cyan-400/40 transition-all duration-300 ${
@@ -104,7 +205,7 @@ export default function Visualize() {
               <div className={`text-xl sm:text-2xl font-bold font-mono ${
                 isDark ? 'text-cyan-400' : 'text-cyan-600'
               }`}>
-                {getSpaceComplexity(id)}
+                {spaceComplexity || 'Varies'}
               </div>
             </div>
             <div className={`backdrop-blur-md rounded-xl p-5 border shadow-xl hover:border-cyan-400/40 transition-all duration-300 ${
@@ -117,7 +218,7 @@ export default function Visualize() {
               }`}>Algorithm</div>
               <div className={`text-lg sm:text-xl font-bold ${
                 isDark ? 'text-white' : 'text-gray-900'
-              }`}>{formatTitle(id)}</div>
+              }`}>{headerTitle}</div>
             </div>
           </motion.div>
         )}

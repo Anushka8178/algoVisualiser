@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../components/ToastProvider';
 import EducatorLayout from '../../components/EducatorLayout';
 
 export default function Resources() {
   const { token } = useAuth();
+  const { showToast } = useToast();
   const [algorithms, setAlgorithms] = useState([]);
   const [algorithmSlug, setAlgorithmSlug] = useState('');
   const [title, setTitle] = useState('');
   const [link, setLink] = useState('');
   const [content, setContent] = useState('');
   const [file, setFile] = useState(null);
-  const [status, setStatus] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(()=>{
@@ -30,42 +32,59 @@ export default function Resources() {
 
   const submit = async (e) => {
     e.preventDefault();
-    setStatus(null);
+    if (!token) {
+      showToast('Please log in to add resources', 'error');
+      return;
+    }
+    
     if(!algorithmSlug){
-      setStatus('Select an algorithm');
+      showToast('Please select an algorithm', 'error');
       return;
     }
     if(!link && !content && !file){
-      setStatus('Provide a link, text content, or upload a file');
+      showToast('Please provide a link, text content, or upload a file', 'error');
       return;
     }
     
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('link', link);
-    formData.append('content', content);
-    formData.append('algorithmSlug', algorithmSlug);
-    if(file){
-      formData.append('file', file);
-    }
-    
-    const res = await fetch('http://localhost:5000/api/educator/resources', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData
-    });
-    const data = await res.json().catch(()=>({}));
-    if(res.ok){
-      setStatus(`Saved for ${algorithmSlug}${data.filePath ? ' (file uploaded)' : ''}`);
-      setTitle('');
-      setLink('');
-      setContent('');
-      setFile(null);
-      // Reset file input
-      const fileInput = document.getElementById('file-input');
-      if(fileInput) fileInput.value = '';
-    } else {
-      setStatus(data.error || 'Failed');
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('link', link);
+      formData.append('content', content);
+      formData.append('algorithmSlug', algorithmSlug);
+      if(file){
+        formData.append('file', file);
+      }
+      
+      const res = await fetch('http://localhost:5000/api/educator/resources', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      
+      const data = await res.json().catch(()=>({}));
+      if(res.ok){
+        showToast(`Resource saved for ${algorithmSlug}${data.filePath ? ' (file uploaded)' : ''}`, 'success');
+        setTitle('');
+        setLink('');
+        setContent('');
+        setFile(null);
+        // Reset file input
+        const fileInput = document.getElementById('file-input');
+        if(fileInput) fileInput.value = '';
+      } else {
+        if (res.status === 401 || res.status === 403) {
+          showToast('Session expired. Please log in again.', 'error');
+        } else {
+          showToast(data.error || 'Failed to save resource', 'error');
+        }
+      }
+    } catch (error) {
+      showToast('Network error. Please try again.', 'error');
+      console.error('Resource upload error:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -139,11 +158,11 @@ export default function Resources() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
-            className="rounded-full border border-cyan-300/60 bg-cyan-500/20 px-6 py-3 text-sm font-semibold text-cyan-100 transition hover:border-cyan-200/80 hover:bg-cyan-500/25"
+            disabled={submitting}
+            className="rounded-full border border-cyan-300/60 bg-cyan-500/20 px-6 py-3 text-sm font-semibold text-cyan-100 transition hover:border-cyan-200/80 hover:bg-cyan-500/25 disabled:opacity-60"
           >
-            Save resource
+            {submitting ? 'Saving...' : 'Save resource'}
           </button>
-          {status && <span className="text-sm text-slate-100/90">{status}</span>}
         </div>
       </form>
     </EducatorLayout>

@@ -66,10 +66,14 @@ export default function MyAlgorithms() {
         // Refresh the list
         await fetchAlgorithms();
       } else {
-        showToast(data.error || 'Failed to delete algorithm', 'error');
+        if (res.status === 401 || res.status === 403) {
+          showToast('Session expired. Please log in again.', 'error');
+        } else {
+          showToast(data.error || 'Failed to delete algorithm', 'error');
+        }
       }
     } catch (err) {
-      showToast('Error deleting algorithm', 'error');
+      showToast('Network error. Please try again.', 'error');
       console.error('Delete error:', err);
     } finally {
       setDeletingId(null);

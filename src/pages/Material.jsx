@@ -1,10 +1,15 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
+import { useToast } from '../components/ToastProvider';
 
-const content = {
+const API_BASE = 'http://localhost:5000';
+const API_URL = `${API_BASE}/api`;
+
+const fallbackContent = {
   'bubble-sort': {
     title: 'Bubble Sort',
     body: 'Bubble sort repeatedly swaps adjacent elements if they are in the wrong order. It is simple but inefficient for large datasets. The algorithm performs multiple passes and each pass pushes the largest remaining element to the end.'
@@ -53,14 +58,95 @@ export default function Material(){
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
-  
-  const info = content[id] || { title: id, body: 'Learn the core idea, steps, and complexity before visualizing.' };
-  
-  console.log('Material page - ID:', id, 'Content found:', !!content[id], 'Title:', info.title);
+  const { showToast } = useToast();
+  const [marking, setMarking] = useState(false);
+  const [algorithm, setAlgorithm] = useState(null);
+  const [algorithmLoading, setAlgorithmLoading] = useState(true);
+  const [resources, setResources] = useState([]);
+  const [resourceLoading, setResourceLoading] = useState(true);
 
-  const onDone = () => {
-    completeAlgorithm(id);
-    navigate(`/visualize/${id}`);
+  useEffect(() => {
+    let isMounted = true;
+    setAlgorithmLoading(true);
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/algorithms/${id}`);
+        if (!isMounted) return;
+
+        if (res.ok) {
+          const data = await res.json();
+          setAlgorithm(data);
+        } else {
+          setAlgorithm(null);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Algorithm fetch failed:', error);
+          showToast('Unable to load material details right now.', 'error');
+        }
+      } finally {
+        if (isMounted) setAlgorithmLoading(false);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, showToast]);
+
+  useEffect(() => {
+    let active = true;
+    setResourceLoading(true);
+
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/algorithms/${id}/resources`);
+        if (!active) return;
+
+        if (res.ok) {
+          const data = await res.json();
+          setResources(Array.isArray(data.resources) ? data.resources : []);
+        } else {
+          setResources([]);
+        }
+      } catch (error) {
+        if (active) {
+          console.error('Resource fetch failed:', error);
+          showToast('Unable to load educator resources right now.', 'error');
+        }
+      } finally {
+        if (active) setResourceLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, [id, showToast]);
+  
+  const info = useMemo(() => {
+    if (algorithm) {
+      const body = (algorithm.material && algorithm.material.trim()) || algorithm.description || 'Learn the core idea, steps, and complexity before visualizing.';
+      return { title: algorithm.title, body };
+    }
+    return fallbackContent[id] || { title: id, body: 'Learn the core idea, steps, and complexity before visualizing.' };
+  }, [algorithm, id]);
+  
+  console.log('Material page - ID:', id, 'Title:', info.title, 'Algorithm loaded:', !!algorithm);
+
+  const onDone = async () => {
+    if (marking) return;
+    setMarking(true);
+    const { success, message } = await completeAlgorithm(id);
+    setMarking(false);
+
+    if (success) {
+      showToast('Marked as completed! Visualization unlocked.', 'success');
+      navigate(`/visualize/${id}`);
+    } else {
+      showToast(message || 'Could not track progress. Please try again.', 'error');
+    }
   };
 
   return (
@@ -101,6 +187,11 @@ export default function Material(){
           <p className={`leading-7 sm:leading-8 text-sm sm:text-base ${
             isDark ? 'text-slate-200' : 'text-gray-700'
           }`}>{info.body}</p>
+          {algorithm && algorithm.material && (
+            <p className={`mt-4 text-xs uppercase tracking-wide ${isDark ? 'text-cyan-200/70' : 'text-cyan-700/70'}`}>
+              Custom material provided by your educator
+            </p>
+          )}
           <ul className={`mt-4 sm:mt-6 list-disc pl-5 sm:pl-6 space-y-2 text-sm sm:text-base ${
             isDark ? 'text-cyan-100/90' : 'text-cyan-700'
           }`}>
@@ -122,11 +213,14 @@ export default function Material(){
             {!hasCompleted(id) ? (
               <motion.button 
                 onClick={onDone} 
-                className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-cyan-600 hover:to-teal-600 shadow-lg hover:shadow-cyan-500/50 transition-all duration-200" 
+                disabled={marking}
+                className={`bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-cyan-500/50 transition-all duration-200 ${
+                  marking ? 'opacity-70 cursor-not-allowed' : 'hover:from-cyan-600 hover:to-teal-600'
+                }`} 
                 whileHover={{ scale:1.02 }} 
                 whileTap={{ scale:0.98 }}
               >
-                Mark Done → Visualize
+                {marking ? 'Saving...' : 'Mark Done → Visualize'}
               </motion.button>
             ) : (
               <Link 
@@ -138,6 +232,97 @@ export default function Material(){
             )}
           </div>
         </motion.div>
+        <motion.section
+          className={`mt-10 rounded-2xl border p-5 sm:p-6 lg:p-8 ${
+            isDark
+              ? 'border-cyan-500/20 bg-slate-900/40 shadow-lg shadow-cyan-900/20'
+              : 'border-cyan-200 bg-white/70 shadow-lg shadow-cyan-200/30'
+          }`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-cyan-400">Educator Resources</h2>
+              <p className={`text-sm ${isDark ? 'text-cyan-100/70' : 'text-cyan-800/80'}`}>
+                Extra reading, links, and files supplied by your educator team.
+              </p>
+            </div>
+            {resourceLoading && (
+              <span className={`text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-cyan-200/70' : 'text-cyan-700/70'}`}>
+                Loading…
+              </span>
+            )}
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {!resourceLoading && resources.length === 0 && (
+              <p className={`text-sm ${isDark ? 'text-slate-300/80' : 'text-gray-600'}`}>
+                No educator resources have been added yet. Check back later!
+              </p>
+            )}
+            {resources.map((resource) => (
+              <article
+                key={resource.id}
+                className={`rounded-xl border p-4 transition hover:-translate-y-0.5 ${
+                  isDark
+                    ? 'border-white/10 bg-slate-900/60 hover:border-cyan-400/40'
+                    : 'border-cyan-100 bg-white hover:border-cyan-300'
+                }`}
+              >
+                <header className="mb-2">
+                  <p className={`text-xs uppercase tracking-wide ${isDark ? 'text-cyan-200/70' : 'text-cyan-700/80'}`}>
+                    {new Date(resource.createdAt).toLocaleDateString()}
+                  </p>
+                  <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    {resource.title || `${info.title} resource`}
+                  </h3>
+                </header>
+                {resource.content && (
+                  <p className={`text-sm leading-6 ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>
+                    {resource.content}
+                  </p>
+                )}
+                <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+                  {resource.link && (
+                    <a
+                      href={resource.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`inline-flex items-center gap-2 rounded-full border border-cyan-400/40 px-4 py-2 ${
+                        isDark ? 'text-cyan-100 hover:bg-cyan-500/10' : 'text-cyan-700 hover:bg-cyan-50'
+                      }`}
+                    >
+                      Visit link
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.5 10.5L21 3m0 0h-6m6 0v6" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.5V21h-7.5" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 21H3v-7.5" />
+                      </svg>
+                    </a>
+                  )}
+                  {resource.filePath && (
+                    <a
+                      href={`${API_BASE}${resource.filePath}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`inline-flex items-center gap-2 rounded-full border border-cyan-400/40 px-4 py-2 ${
+                        isDark ? 'text-cyan-100 hover:bg-cyan-500/10' : 'text-cyan-700 hover:bg-cyan-50'
+                      }`}
+                    >
+                      Download file
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 10l5 5 5-5" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15V3" />
+                      </svg>
+                    </a>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </motion.section>
       </div>
     </div>
   );

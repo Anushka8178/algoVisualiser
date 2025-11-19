@@ -116,6 +116,17 @@ render();
 3. **Removed** `const height = +svg.attr("height");` - height is already provided
 4. **Updated** `render()` function to use `svg.selectAll("line, circle, text").remove()` instead of `svg.selectAll("*:not(defs)").remove()` to preserve the defs element
 
+## Full Topological Sort Sandbox
+
+If you need a complete experience (preset DAG, undo, clear/reset buttons, random DAG generator, node deletion, etc.), use the code stored in `TOPOLOGICAL_SORT_FULL_CODE.js`. Paste that file directly into the educator "D3 Visualization Code" field. It ships with:
+
+- Toolbar buttons: `Run Topo Sort`, `Undo`, `Clear`, `Random DAG`, `Reset Default`
+- Click-to-add nodes, drag-to-create edges, click-to-delete nodes
+- Automatic starter DAG plus random DAG generator
+- Animated Kahn’s algorithm with status updates and cycle detection
+
+Feel free to duplicate the patterns in that file for other graph algorithms.
+
 ## Available Variables
 
 - `svg` - D3 selection of the SVG element (already selected, ready to use)

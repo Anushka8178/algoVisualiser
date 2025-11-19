@@ -37,28 +37,37 @@ router.post("/complete", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const today = new Date().toISOString().split("T")[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const todayDate = `${year}-${month}-${day}`;
+    const startOfToday = new Date(`${todayDate}T00:00:00`);
     const previousStreak = user.streak || 0;
     let streakChanged = false;
     let newStreakValue = previousStreak;
-    const existingProgress = await UserProgress.findOne({
-      where: {
-        userId: req.userId,
-        algorithmId,
-        activityType: "completed",
-        completedAt: {
-          [Op.gte]: new Date(today),
-        },
-      },
-    });
 
-    if (existingProgress && activityType === "completed") {
-      return res.json({
-        message: "Already completed today",
-        user: await User.findByPk(req.userId, {
-          attributes: ["id", "username", "streak", "totalEngagement"],
-        }),
+    if (activityType === "completed") {
+      const existingProgress = await UserProgress.findOne({
+        where: {
+          userId: req.userId,
+          algorithmId,
+          activityType: "completed",
+          completedAt: {
+            [Op.gte]: startOfToday,
+          },
+        },
       });
+
+      if (existingProgress) {
+        console.log(`[Progress] Duplicate completion blocked for user ${req.userId}, algorithm ${algorithmId}`);
+        return res.json({
+          message: "Already completed today",
+          user: await User.findByPk(req.userId, {
+            attributes: ["id", "username", "email", "streak", "totalEngagement", "lastActiveDate"],
+          }),
+        });
+      }
     }
 
     await UserProgress.create({
@@ -69,21 +78,32 @@ router.post("/complete", verifyToken, async (req, res) => {
 
     await user.increment("totalEngagement");
 
-    const todayDate = new Date().toISOString().split("T")[0];
-    const lastActive = user.lastActiveDate
-      ? new Date(user.lastActiveDate).toISOString().split("T")[0]
-      : null;
+    const getDateString = (value) => {
+      if (!value) return null;
+      if (value instanceof Date) {
+        const y = value.getFullYear();
+        const m = String(value.getMonth() + 1).padStart(2, "0");
+        const d = String(value.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      return String(value).split("T")[0];
+    };
+
+    const lastActive = getDateString(user.lastActiveDate);
 
     if (lastActive !== todayDate) {
-      const yesterday = new Date();
+      const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      const yYear = yesterday.getFullYear();
+      const yMonth = String(yesterday.getMonth() + 1).padStart(2, "0");
+      const yDay = String(yesterday.getDate()).padStart(2, "0");
+      const yesterdayStr = `${yYear}-${yMonth}-${yDay}`;
 
       if (lastActive === yesterdayStr) {
         await user.increment("streak");
         streakChanged = true;
         newStreakValue = previousStreak + 1;
-      } else if (lastActive !== todayDate) {
+      } else {
         await user.update({ streak: 1 });
         streakChanged = true;
         newStreakValue = 1;
@@ -96,7 +116,7 @@ router.post("/complete", verifyToken, async (req, res) => {
       attributes: ["id", "username", "email", "streak", "totalEngagement", "lastActiveDate"],
     });
 
-    if (streakChanged) {
+    if (streakChanged && activityType === "completed") {
       try {
         await sendStreakNotification({
           userEmail: updatedUser.email,

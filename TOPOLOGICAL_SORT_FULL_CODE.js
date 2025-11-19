@@ -1,354 +1,395 @@
-// Complete Topological Sort Visualization Code
-// Paste this entire code into the "D3 Visualization Code" field
+// Full-featured Topological Sort visualization for educators
+// Paste this entire snippet into the D3 Visualization Code editor
 
-// Arrow marker for directed edges
-svg.append("defs").append("marker")
+const state = {
+  nodes: [],
+  links: [],
+  counter: 0,
+  drawingEdge: null,
+  history: [],
+  future: [],
+};
+
+function pushHistory() {
+  state.history.push({
+    nodes: state.nodes.map((n) => ({ ...n })),
+    links: state.links.map((l) => ({
+      source: l.source.id,
+      target: l.target.id,
+    })),
+  });
+  state.future = [];
+}
+
+function restore(snapshot) {
+  const nodeMap = new Map(snapshot.nodes.map((n) => [n.id, { ...n }]));
+  state.nodes = snapshot.nodes.map((n) => nodeMap.get(n.id));
+  state.links = snapshot.links.map((l) => ({
+    source: nodeMap.get(l.source),
+    target: nodeMap.get(l.target),
+  }));
+  state.counter = Math.max(0, ...state.nodes.map((n) => n.id));
+}
+
+svg.selectAll("*").remove();
+svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+const defs = svg.append("defs");
+const gradient = defs
+  .append("linearGradient")
+  .attr("id", "runGradient")
+  .attr("x1", "0%")
+  .attr("x2", "100%");
+gradient.append("stop").attr("offset", "0%").attr("stop-color", "#0ea5e9");
+gradient.append("stop").attr("offset", "100%").attr("stop-color", "#22d3ee");
+
+defs
+  .append("marker")
   .attr("id", "arrow")
-  .attr("viewBox", "0 -5 10 10")
-  .attr("refX", 20)
-  .attr("refY", 0)
+  .attr("viewBox", "0 0 10 10")
+  .attr("refX", 14)
+  .attr("refY", 5)
   .attr("markerWidth", 6)
   .attr("markerHeight", 6)
-  .attr("orient", "auto")
+  .attr("orient", "auto-start-reverse")
   .append("path")
-  .attr("d", "M0,-5L10,0L0,5")
-  .attr("fill", "#94a3b8");
+  .attr("d", "M0 0 L10 5 L0 10")
+  .attr("fill", "#38bdf8");
 
-// Data structures
-let nodes = [];
-let links = [];
-let creatingLink = null;
-let undoStack = [];
-let isRunning = false;
-let sortedOrder = [];
-let currentStep = 0;
-let inDegree = {};
-let queue = [];
-let visited = new Set();
+const background = svg
+  .append("rect")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("fill", "rgba(15,23,42,0.94)")
+  .on("click", addNode)
+  .on("mousemove", dragEdgePreview)
+  .on("mouseup", cancelEdge);
 
-// Click to create nodes
-svg.on("click", function (event) {
-  if (isRunning) return;
-  const [x, y] = d3.pointer(event, svg.node());
-  const newId = String.fromCharCode(65 + nodes.length);
-  const newNode = { id: newId, x, y };
-  nodes.push(newNode);
-  undoStack.push({ type: "addNode", node: newNode });
-  render();
-});
+const previewLine = svg
+  .append("path")
+  .attr("stroke", "#38bdf8")
+  .attr("stroke-width", 2)
+  .attr("stroke-dasharray", "5 4")
+  .attr("pointer-events", "none")
+  .style("opacity", 0);
 
-// Drag behavior for nodes
-const drag = d3.drag()
-  .on("start", function(event, d) {
-    if (isRunning) return;
-    d3.select(this).raise().attr("stroke", "#3b82f6");
-  })
-  .on("drag", function(event, d) {
-    if (isRunning) return;
-    d.x = event.x;
-    d.y = event.y;
-    render();
-  })
-  .on("end", function(event, d) {
-    if (isRunning) return;
-    d3.select(this).attr("stroke", "#475569");
-    
-    setTimeout(() => {
-      if (creatingLink && creatingLink.id !== d.id) {
-        // Check if link already exists
-        const linkExists = links.some(l => 
-          (l.source.id === creatingLink.id && l.target.id === d.id) ||
-          (l.source === creatingLink && l.target === d)
-        );
-        
-        if (!linkExists) {
-          const newLink = { 
-            source: creatingLink, 
-            target: d,
-            id: `${creatingLink.id}-${d.id}`
-          };
-          links.push(newLink);
-          undoStack.push({ type: "addLink", link: newLink });
-          render();
-        }
-        creatingLink = null;
-      } else {
-        creatingLink = d;
+const linkLayer = svg.append("g");
+const nodeLayer = svg.append("g");
+
+const toolbar = svg
+  .append("g")
+  .attr("transform", `translate(${width / 2}, 50)`);
+
+toolbar
+  .append("rect")
+  .attr("x", -260)
+  .attr("y", -28)
+  .attr("width", 520)
+  .attr("height", 56)
+  .attr("rx", 26)
+  .attr("fill", "rgba(8,47,73,0.75)")
+  .attr("stroke", "#38bdf8");
+
+const buttonData = [
+  { label: "Run Topo Sort", action: runTopoSort, main: true },
+  { label: "Undo", action: undoChange },
+  { label: "Clear", action: clearAll },
+  { label: "Random DAG", action: randomDag },
+  { label: "Reset Default", action: seedDefault },
+];
+
+const buttons = toolbar
+  .selectAll("g.btn")
+  .data(buttonData)
+  .enter()
+  .append("g")
+  .attr("class", "btn")
+  .attr("transform", (_d, i) => `translate(${(i - 2) * 105}, 0)`)
+  .style("cursor", "pointer")
+  .on("click", (d) => d.action());
+
+buttons
+  .append("rect")
+  .attr("x", (d) => (d.main ? -70 : -48))
+  .attr("y", -16)
+  .attr("width", (d) => (d.main ? 140 : 96))
+  .attr("height", 32)
+  .attr("rx", 14)
+  .attr("fill", (d) =>
+    d.main ? "url(#runGradient)" : "rgba(15,118,110,0.4)"
+  )
+  .attr("stroke", (d) => (d.main ? "#0ea5e9" : "#0f766e"));
+
+buttons
+  .append("text")
+  .attr("text-anchor", "middle")
+  .attr("alignment-baseline", "middle")
+  .attr("fill", "#e0f2fe")
+  .attr("font-size", 12)
+  .attr("font-weight", 600)
+  .text((d) => d.label);
+
+const statusText = svg
+  .append("text")
+  .attr("x", width / 2)
+  .attr("y", height - 30)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 16)
+  .attr("font-weight", 600)
+  .attr("fill", "#a5f3fc");
+
+svg
+  .append("text")
+  .attr("x", width / 2)
+  .attr("y", height - 60)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 12)
+  .attr("fill", "#bae6fd")
+  .text("Click = add node • Drag node into another = edge • Click node to delete");
+
+function addNode(event) {
+  if (event.target !== background.node()) return;
+  pushHistory();
+  const [x, y] = d3.pointer(event);
+  state.nodes.push({ id: ++state.counter, label: `N${state.counter}`, x, y });
+  redraw();
+}
+
+function dragNode(event, node) {
+  node.x = event.x;
+  node.y = event.y;
+  redraw();
+}
+
+function startEdge(event, node) {
+  event.stopPropagation();
+  state.drawingEdge = { source: node };
+  previewLine.style("opacity", 1);
+}
+
+function dragEdgePreview(event) {
+  if (!state.drawingEdge) return;
+  const [x, y] = d3.pointer(event);
+  const { source } = state.drawingEdge;
+  previewLine.attr("d", `M${source.x},${source.y} L${x},${y}`);
+}
+
+function finishEdge(event, target) {
+  event.stopPropagation();
+  if (!state.drawingEdge || state.drawingEdge.source === target) {
+    cancelEdge();
+    return;
+  }
+  const exists = state.links.some(
+    (l) => l.source.id === state.drawingEdge.source.id && l.target.id === target.id
+  );
+  if (!exists) {
+    pushHistory();
+    state.links.push({ source: state.drawingEdge.source, target });
+  }
+  cancelEdge();
+  redraw();
+}
+
+function cancelEdge() {
+  state.drawingEdge = null;
+  previewLine.style("opacity", 0);
+}
+
+function deleteNode(event, node) {
+  event.stopPropagation();
+  pushHistory();
+  state.nodes = state.nodes.filter((n) => n.id !== node.id);
+  state.links = state.links.filter(
+    (l) => l.source.id !== node.id && l.target.id !== node.id
+  );
+  redraw();
+}
+
+function clearAll() {
+  if (!state.nodes.length && !state.links.length) return;
+  pushHistory();
+  state.nodes = [];
+  state.links = [];
+  redraw();
+  showStatus("Cleared canvas", "#94a3b8");
+}
+
+function undoChange() {
+  if (!state.history.length) return;
+  const snapshot = state.history.pop();
+  state.future.push({
+    nodes: state.nodes.map((n) => ({ ...n })),
+    links: state.links.map((l) => ({ source: l.source.id, target: l.target.id })),
+  });
+  restore(snapshot);
+  redraw();
+  showStatus("Undo successful", "#fde68a");
+}
+
+function randomDag() {
+  pushHistory();
+  const count = d3.randomInt(5, 8)();
+  const newNodes = Array.from({ length: count }, (_, i) => ({
+    id: ++state.counter,
+    label: `R${state.counter}`,
+    x: 160 + (i % 3) * 220 + Math.random() * 60,
+    y: 140 + Math.floor(i / 3) * 180 + Math.random() * 40,
+  }));
+  state.nodes = newNodes;
+
+  const edges = [];
+  for (let i = 0; i < count; i++) {
+    for (let j = i + 1; j < count; j++) {
+      if (Math.random() < 0.4) {
+        edges.push({ source: newNodes[i], target: newNodes[j] });
       }
-    }, 10);
-  });
-
-// Calculate in-degrees for topological sort
-function calculateInDegrees() {
-  inDegree = {};
-  nodes.forEach(node => {
-    inDegree[node.id] = 0;
-  });
-  
-  links.forEach(link => {
-    const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-    if (inDegree[targetId] !== undefined) {
-      inDegree[targetId]++;
     }
-  });
-}
-
-// Topological Sort Algorithm (Kahn's Algorithm)
-function topologicalSort() {
-  if (isRunning) return;
-  
-  isRunning = true;
-  sortedOrder = [];
-  currentStep = 0;
-  visited.clear();
-  calculateInDegrees();
-  
-  // Find all nodes with in-degree 0
-  queue = nodes.filter(node => inDegree[node.id] === 0);
-  
-  if (queue.length === 0 && nodes.length > 0) {
-    // Cycle detected
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", 30)
-      .attr("text-anchor", "middle")
-      .attr("fill", "#ef4444")
-      .attr("font-size", "18px")
-      .attr("font-weight", "bold")
-      .attr("id", "error-msg")
-      .text("Cycle detected! Topological sort not possible.");
-    isRunning = false;
-    return;
   }
-  
-  processQueue();
+  state.links = edges;
+  redraw();
+  showStatus("Random DAG generated", "#facc15");
 }
 
-function processQueue() {
-  if (queue.length === 0) {
-    if (sortedOrder.length < nodes.length) {
-      // Cycle detected
-      svg.select("#error-msg").remove();
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", 30)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#ef4444")
-        .attr("font-size", "18px")
-        .attr("font-weight", "bold")
-        .attr("id", "error-msg")
-        .text("Cycle detected! Topological sort not possible.");
-    } else {
-      // Success
-      svg.select("#error-msg").remove();
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", 30)
-        .attr("text-anchor", "middle")
-        .attr("fill", "#10b981")
-        .attr("font-size", "18px")
-        .attr("font-weight", "bold")
-        .attr("id", "success-msg")
-        .text("Topological Order: " + sortedOrder.join(" → "));
-    }
-    isRunning = false;
-    return;
-  }
-  
-  const current = queue.shift();
-  sortedOrder.push(current.id);
-  visited.add(current.id);
-  
-  // Update visualization
-  render();
-  
-  // Highlight current node
-  svg.selectAll("circle")
-    .filter(d => d.id === current.id)
-    .attr("fill", "#10b981")
-    .attr("stroke", "#059669")
-    .attr("stroke-width", 3);
-  
-  // Find neighbors and decrease their in-degree
-  const neighbors = links
-    .filter(link => {
-      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-      return sourceId === current.id;
-    })
-    .map(link => {
-      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-      return nodes.find(n => n.id === targetId);
-    })
-    .filter(n => n && !visited.has(n.id));
-  
-  neighbors.forEach(neighbor => {
-    inDegree[neighbor.id]--;
-    if (inDegree[neighbor.id] === 0) {
-      queue.push(neighbor);
-    }
-  });
-  
-  // Continue after delay
-  setTimeout(() => {
-    processQueue();
-  }, 1000);
+function seedDefault() {
+  pushHistory();
+  state.nodes = [
+    { id: 1, label: "N1", x: 200, y: 180 },
+    { id: 2, label: "N2", x: 420, y: 140 },
+    { id: 3, label: "N3", x: 420, y: 280 },
+    { id: 4, label: "N4", x: 640, y: 180 },
+    { id: 5, label: "N5", x: 640, y: 320 },
+  ];
+  state.counter = 5;
+  state.links = [
+    { source: state.nodes[0], target: state.nodes[1] },
+    { source: state.nodes[0], target: state.nodes[2] },
+    { source: state.nodes[1], target: state.nodes[3] },
+    { source: state.nodes[2], target: state.nodes[4] },
+  ];
+  redraw();
+  showStatus("Default DAG loaded", "#38bdf8");
 }
 
-// Reset visualization
-function resetVisualization() {
-  isRunning = false;
-  sortedOrder = [];
-  currentStep = 0;
-  visited.clear();
-  svg.selectAll("#error-msg, #success-msg").remove();
-  render();
-}
-
-// Render function
-function render(highlights = {}, message = "") {
-  // Clear everything except defs and messages
-  svg.selectAll("line, circle, text:not(#error-msg):not(#success-msg)").remove();
-  
-  // Draw links (edges)
-  svg.selectAll("line")
-    .data(links)
+function redraw() {
+  const links = linkLayer
+    .selectAll("path")
+    .data(state.links, (d) => `${d.source.id}-${d.target.id}`);
+  links.exit().remove();
+  links
     .enter()
-    .append("line")
-    .attr("x1", d => {
-      const source = typeof d.source === 'object' ? d.source : nodes.find(n => n.id === d.source);
-      return source ? source.x : 0;
-    })
-    .attr("y1", d => {
-      const source = typeof d.source === 'object' ? d.source : nodes.find(n => n.id === d.source);
-      return source ? source.y : 0;
-    })
-    .attr("x2", d => {
-      const target = typeof d.target === 'object' ? d.target : nodes.find(n => n.id === d.target);
-      return target ? target.x : 0;
-    })
-    .attr("y2", d => {
-      const target = typeof d.target === 'object' ? d.target : nodes.find(n => n.id === d.target);
-      return target ? target.y : 0;
-    })
-    .attr("stroke", "#94a3b8")
+    .append("path")
+    .attr("fill", "none")
+    .attr("stroke", "#38bdf8")
     .attr("stroke-width", 2)
     .attr("marker-end", "url(#arrow)");
-  
-  // Draw nodes
-  svg.selectAll("circle")
-    .data(nodes)
+
+  linkLayer
+    .selectAll("path")
+    .attr("d", (d) => `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`);
+
+  const nodes = nodeLayer.selectAll("g.node").data(state.nodes, (d) => d.id);
+  nodes.exit().remove();
+
+  const enter = nodes
     .enter()
+    .append("g")
+    .attr("class", "node")
+    .call(d3.drag().on("start", cancelEdge).on("drag", dragNode))
+    .on("mousedown", startEdge)
+    .on("mouseup", finishEdge)
+    .on("click", deleteNode);
+
+  enter
     .append("circle")
-    .attr("cx", d => d.x)
-    .attr("cy", d => d.y)
-    .attr("r", 25)
-    .attr("fill", d => {
-      if (sortedOrder.includes(d.id)) return "#10b981";
-      if (queue.some(n => n.id === d.id)) return "#fbbf24";
-      return "#cbd5e1";
-    })
-    .attr("stroke", d => {
-      if (sortedOrder.includes(d.id)) return "#059669";
-      if (queue.some(n => n.id === d.id)) return "#f59e0b";
-      return "#475569";
-    })
-    .attr("stroke-width", d => {
-      if (sortedOrder.includes(d.id) || queue.some(n => n.id === d.id)) return 3;
-      return 2.5;
-    })
-    .call(drag);
-  
-  // Draw node labels
-  svg.selectAll("text.node-label")
-    .data(nodes)
-    .enter()
+    .attr("r", 26)
+    .attr("fill", "#1d4ed8")
+    .attr("stroke", "#93c5fd")
+    .attr("stroke-width", 2);
+
+  enter
     .append("text")
-    .attr("class", "node-label")
-    .attr("x", d => d.x)
-    .attr("y", d => d.y + 6)
     .attr("text-anchor", "middle")
-    .text(d => d.id)
-    .attr("font-size", "18px")
-    .attr("font-weight", "bold")
-    .attr("fill", "#1e293b")
-    .attr("pointer-events", "none");
-  
-  // Show in-degree on nodes
-  if (Object.keys(inDegree).length > 0) {
-    svg.selectAll("text.in-degree")
-      .data(nodes)
-      .enter()
-      .append("text")
-      .attr("class", "in-degree")
-      .attr("x", d => d.x + 20)
-      .attr("y", d => d.y - 20)
-      .attr("text-anchor", "middle")
-      .text(d => `in: ${inDegree[d.id] || 0}`)
-      .attr("font-size", "12px")
-      .attr("fill", "#64748b")
-      .attr("pointer-events", "none");
+    .attr("alignment-baseline", "middle")
+    .attr("fill", "#e0f2fe")
+    .attr("font-weight", 600)
+    .text((d) => d.label);
+
+  nodeLayer.selectAll("g.node").attr("transform", (d) => `translate(${d.x},${d.y})`);
+}
+
+async function runTopoSort() {
+  if (!state.nodes.length) return;
+  resetColors();
+  pushHistory();
+
+  const inDegree = new Map(state.nodes.map((n) => [n.id, 0]));
+  state.links.forEach((link) => {
+    inDegree.set(link.target.id, (inDegree.get(link.target.id) || 0) + 1);
+  });
+
+  const queue = state.nodes.filter((n) => inDegree.get(n.id) === 0);
+  const order = [];
+
+  queue.forEach((n) => fillNode(n, "#22d3ee"));
+
+  while (queue.length) {
+    const node = queue.shift();
+    order.push(node);
+    fillNode(node, "#22c55e");
+    await wait(400);
+
+    state.links
+      .filter((link) => link.source.id === node.id)
+      .forEach((link) => {
+        strokeEdge(link, "#f97316");
+        inDegree.set(link.target.id, inDegree.get(link.target.id) - 1);
+        if (inDegree.get(link.target.id) === 0) {
+          queue.push(link.target);
+          fillNode(link.target, "#22d3ee");
+        }
+      });
   }
-  
-  // Show control buttons
-  if (!svg.select("g.controls").node()) {
-    const controls = svg.append("g").attr("class", "controls");
-    
-    // Run button
-    controls.append("rect")
-      .attr("x", 10)
-      .attr("y", height - 50)
-      .attr("width", 120)
-      .attr("height", 35)
-      .attr("rx", 5)
-      .attr("fill", "#3b82f6")
-      .attr("cursor", "pointer")
-      .on("click", topologicalSort);
-    
-    controls.append("text")
-      .attr("x", 70)
-      .attr("y", height - 28)
-      .attr("text-anchor", "middle")
-      .attr("fill", "white")
-      .attr("font-size", "14px")
-      .attr("font-weight", "bold")
-      .attr("pointer-events", "none")
-      .text("Run Topo Sort");
-    
-    // Reset button
-    controls.append("rect")
-      .attr("x", 140)
-      .attr("y", height - 50)
-      .attr("width", 100)
-      .attr("height", 35)
-      .attr("rx", 5)
-      .attr("fill", "#64748b")
-      .attr("cursor", "pointer")
-      .on("click", resetVisualization);
-    
-    controls.append("text")
-      .attr("x", 190)
-      .attr("y", height - 28)
-      .attr("text-anchor", "middle")
-      .attr("fill", "white")
-      .attr("font-size", "14px")
-      .attr("font-weight", "bold")
-      .attr("pointer-events", "none")
-      .text("Reset");
-  }
-  
-  // Show instructions
-  if (nodes.length === 0 && !isRunning) {
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", height / 2)
-      .attr("text-anchor", "middle")
-      .attr("fill", "#94a3b8")
-      .attr("font-size", "16px")
-      .attr("opacity", 0.7)
-      .text("Click to add nodes, drag from node to node to create edges");
+
+  if (order.length !== state.nodes.length) {
+    showStatus("Cycle detected — no topological order", "#f87171");
+  } else {
+    showStatus(`Order: ${order.map((n) => n.label).join(" → ")}`, "#34d399");
   }
 }
 
-// Initial render
-render();
+function resetColors() {
+  nodeLayer.selectAll("circle").attr("fill", "#1d4ed8");
+  linkLayer.selectAll("path").attr("stroke", "#38bdf8");
+}
+
+function fillNode(node, color) {
+  nodeLayer
+    .selectAll("g.node")
+    .filter((d) => d.id === node.id)
+    .select("circle")
+    .transition()
+    .duration(200)
+    .attr("fill", color);
+}
+
+function strokeEdge(link, color) {
+  linkLayer
+    .selectAll("path")
+    .filter((d) => d === link)
+    .transition()
+    .duration(200)
+    .attr("stroke", color);
+}
+
+function showStatus(text, color = "#bae6fd") {
+  statusText.attr("fill", color).text(text);
+}
+
+function wait(ms) {
+  return new Promise((res) => setTimeout(res, ms));
+}
+
+seedDefault();
+redraw();
 

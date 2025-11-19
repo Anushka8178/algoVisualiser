@@ -124,6 +124,12 @@ export function AuthProvider({ children }) {
         },
       });
 
+      if (response.status === 401 || response.status === 403) {
+        console.warn('Stats request failed – invalid token. Logging out.');
+        logout();
+        return;
+      }
+
       if (response.ok) {
         const data = await response.json();
         console.log('Fetched user stats:', data.stats);
@@ -134,6 +140,12 @@ export function AuthProvider({ children }) {
             'Authorization': `Bearer ${authToken}`,
           },
         });
+
+        if (historyResponse.status === 401 || historyResponse.status === 403) {
+          console.warn('History request failed – invalid token. Logging out.');
+          logout();
+          return;
+        }
 
         if (historyResponse.ok) {
           const history = await historyResponse.json();
@@ -156,18 +168,22 @@ export function AuthProvider({ children }) {
 
   const completeAlgorithm = async (slug) => {
     if (!token) {
-      console.warn('Cannot complete algorithm: not logged in');
-      return;
+      const message = 'You must be logged in to track progress.';
+      console.warn(message);
+      return { success: false, message };
     }
 
-    if (hasCompleted(slug)) return;
+    if (hasCompleted(slug)) {
+      return { success: true, message: 'Already completed.' };
+    }
 
     try {
-
       const algoResponse = await fetch(`http://localhost:5000/api/algorithms/${slug}`);
       if (!algoResponse.ok) {
-        console.error('Algorithm not found');
-        return;
+        const errorText = await algoResponse.text();
+        const message = errorText || 'Algorithm not found on the server.';
+        console.error('Algorithm lookup failed:', algoResponse.status, message);
+        return { success: false, message };
       }
       const algorithm = await algoResponse.json();
 
@@ -183,8 +199,23 @@ export function AuthProvider({ children }) {
         }),
       });
 
+      const parseErrorMessage = async () => {
+        try {
+          const data = await response.clone().json();
+          return data?.error || data?.message || '';
+        } catch {
+          return await response.text();
+        }
+      };
+
+      if (response.status === 401 || response.status === 403) {
+        console.warn('Progress request failed – invalid token. Logging out.');
+        logout();
+        return { success: false, message: 'Session expired. Please log in again.' };
+      }
+
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         setCompletedAlgorithms(prev => [...prev, slug]);
 
         // Immediately update user stats with the response data if available
@@ -198,9 +229,15 @@ export function AuthProvider({ children }) {
 
         // Also fetch fresh stats to ensure everything is up to date
         await fetchUserStats(token);
+        return { success: true };
+      } else {
+        const message = (await parseErrorMessage()) || 'Failed to track progress.';
+        console.error('Failed to track progress:', response.status, message);
+        return { success: false, message };
       }
     } catch (error) {
       console.error('Error completing algorithm:', error);
+      return { success: false, message: error.message || 'Unexpected error while tracking progress.' };
     }
   };
 
