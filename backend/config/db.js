@@ -9,11 +9,11 @@ const dbHost = process.env.DB_HOST || "localhost";
 const dbPort = process.env.DB_PORT || 5433;
 
 if (!dbName || !dbUser || !dbPass) {
-  console.error("❌ Database configuration missing!");
+  console.error("Database configuration missing!");
   console.error("Required environment variables:");
-  console.error("  - DB_NAME:", dbName || "❌ MISSING");
-  console.error("  - DB_USER:", dbUser || "❌ MISSING");
-  console.error("  - DB_PASS:", dbPass ? "***" : "❌ MISSING");
+  console.error("  - DB_NAME:", dbName || "MISSING");
+  console.error("  - DB_USER:", dbUser || "MISSING");
+  console.error("  - DB_PASS:", dbPass ? "***" : "MISSING");
   console.error("\nPlease check your .env file in the backend directory.");
   process.exit(1);
 }
@@ -37,7 +37,7 @@ sequelize.authenticate()
     console.log("✅ Database connection authenticated");
   })
   .catch((err) => {
-    console.error("❌ Database authentication failed!");
+    console.error("Database authentication failed!");
     console.error("Error details:", err.message);
     console.error("\nTroubleshooting:");
     console.error("1. Check if PostgreSQL is running");
